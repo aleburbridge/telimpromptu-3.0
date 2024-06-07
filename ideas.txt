@@ -1,0 +1,28 @@
+Telimpromptu, all in JavaScript. Frontend in vanilla react, styled with tailwind, database and hosting through firebase. 
+
+Features:
+form where users can create their own scripts
+Generate Invite Links
+Pick a random script done by someone else
+Vote on scripts
+
+Flow is:
+HomePage -> CreateRoomForm or JoinRoom -> WaitingRoom (assign headline writer)-> 
+TopicVote -> Headline (dole out roles, dole out propmts) -> PromptFilling -> Teleprompter
+
+->Voting system
+    after a teleprompter is displayed, players should be able to upvote or downvote each segment. Maybe highly upvoted segments are most likely to appear for other players
+
+->Prompt shenanigans
+    Create a universal function that prefills any relevant script data, instead of having separate functions. this will be used for prompt serving and displaying the teleprompter
+
+->api shenanigans
+    replace all utils with cloud function calls
+    remove utils files
+
+
+🪲 BUGS 🪲
+• group prompts are not displaying in order i.e. the person who the quote is attributed to comes first 
+• submit on the prompt answering page (sometimes) hard refreshes all connected browsers - fixed?
+• not all responses are being saved. On my test I got 3 out of 9 responses saved.
+• when the headline is submitted, nobody gets redirected

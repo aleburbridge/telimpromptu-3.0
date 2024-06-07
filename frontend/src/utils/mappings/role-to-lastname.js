@@ -1,0 +1,23 @@
+export const roleToLastNameList = [
+  { role: 'sports', lastNames: ['player', 'coach', 'fan', 'analyst'] },
+  { role: 'politics', lastNames: ['politician', 'political-correspondent', 'campaign-strategist', 'local-person'] },
+  { role: 'crime', lastNames: ['criminal', 'detective', 'witness', 'criminologist'] },
+  { role: 'other', lastNames: ['mother', 'man', 'lad'] },
+  { role: 'host', lastNames: ['Hostdanews', 'Hosterson', 'Anchorman'] },
+  { role: 'cohost', lastNames: ['McHostly', 'Hostly', 'McNewsman'] },
+  { role: 'detective', lastNames: ['Gumshoe', 'Holmes', 'Sleuthburger'] },
+  { role: 'witness', lastNames: ['Sawdathing'] },
+  { role: 'criminologist', lastNames: ['McCrimey'] },
+  { role: 'mother', lastNames: ['Momsly'] },
+  { role: 'man', lastNames: ['Mansly'] },
+  { role: 'lad', lastNames: ['Ladsly'] },
+  { role: 'player', lastNames: ['kickaball'] },
+  { role: 'coach', lastNames: ['McCoach'] },
+  { role: 'fan', lastNames: ['McFan'] },
+  { role: 'analyst', lastNames: ['McAnalyst'] },
+  { role: 'politician', lastNames: ['Kennedy'] },
+  { role: 'political-correspondent', lastNames: ['Policywise'] },
+  { role: 'campaign-strategist', lastNames: ['Jones'] },
+  { role: 'local-person', lastNames: ['Personson'] },
+  { role: 'criminal', lastNames: ['McGuilty'] }
+];
