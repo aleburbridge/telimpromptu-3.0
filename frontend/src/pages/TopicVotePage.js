@@ -35,7 +35,9 @@ export default function TopicVotePage() {
                     const roomData = roomDoc.data();
                     console.log(roomData, roomData.rolesAssigned)
                     if (roomData && roomData.rolesAssigned) {
+                        unsubscribeRoom();
                         navigate('/headline');
+                        console.log("navigated to headline page");
                     }
                 });
 

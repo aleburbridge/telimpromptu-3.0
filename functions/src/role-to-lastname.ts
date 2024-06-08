@@ -1,15 +1,10 @@
 export const roleToLastNameList = [
-  { role: 'sports', lastNames: ['player', 'coach', 'fan', 'analyst'] },
-  { role: 'crime', lastNames: ['criminal', 'detective', 'witness', 'criminologist'] },
-  { role: 'other', lastNames: ['mother', 'man', 'lad'] },
   { role: 'host', lastNames: ['Hostdanews', 'Hosterson', 'Anchorman'] },
-  { role: 'cohost', lastNames: ['McHostly', 'Hostly', 'McNewsman'] },
+  { role: 'cohost', lastNames: ['McHostly', 'Hostly', 'Newsman'] },
   { role: 'detective', lastNames: ['Gumshoe', 'Holmes', 'Sleuthburger'] },
   { role: 'witness', lastNames: ['Sawdathing'] },
   { role: 'criminologist', lastNames: ['McCrimey'] },
   { role: 'mother', lastNames: ['Momsly'] },
-  { role: 'man', lastNames: ['Mansly'] },
-  { role: 'lad', lastNames: ['Ladsly'] },
   { role: 'player', lastNames: ['kickaball'] },
   { role: 'coach', lastNames: ['McCoach'] },
   { role: 'fan', lastNames: ['McFan'] },
@@ -19,5 +14,6 @@ export const roleToLastNameList = [
   { role: 'campaignstrategist', lastNames: ['Jones'] },
   { role: 'localperson', lastNames: ['Personson'] },
   { role: 'criminal', lastNames: ['McGuilty'] },
-  { role: 'guestexpert', lastNames: ['Expertson'] }
+  { role: 'guestexpert', lastNames: ['Expertson'] },
+  { role: 'fieldreporter', lastNames: ['Fieldsly', 'Fielderson'] },
 ];

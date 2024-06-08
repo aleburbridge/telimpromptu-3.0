@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../config/firebase';
-import { getAvailablePromptsForPlayer, getRoomIdFromPlayerId } from '../utils/player-utils';
+import { getAvailablePromptsForPlayer, getRoomIdFromPlayerId, getPlayerDataFromPlayerId } from '../utils/player-utils';
 import { getRoomDataFromRoomId } from '../utils/room-utils';
 import PlayersAndRoles from '../components/PlayersAndRoles';
 import { replacePlaceholdersInPrompts } from '../utils/scripts-utils';
@@ -14,6 +14,7 @@ export default function PromptAnswering() {
     const [headline, setHeadline] = useState('');
     const [playerId, setPlayerId] = useState(localStorage.getItem('playerId'));
     const navigate = useNavigate();
+    const refreshShit = {};
 
     useEffect(() => {
         const initializeRoom = async () => {
@@ -23,36 +24,52 @@ export default function PromptAnswering() {
             setHeadline(roomData.headline);
         };
 
-        let unsubscribe;
-
-        async function setupListener() {
-            const roomId = await getRoomIdFromPlayerId(playerId);
-
-            if (roomId) {
-                const roomDocRef = doc(db, 'rooms', roomId);
-                unsubscribe = onSnapshot(roomDocRef, async (docSnapshot) => {
-                    if (docSnapshot.exists()) {
-                        const fetchedPrompts = await getAvailablePromptsForPlayer(playerId);
-                        const prefilledPrompts = await replacePlaceholdersInPrompts(fetchedPrompts, roomId);
-                        setPrompts(prefilledPrompts);
-                    }
-                });
-            }
-        }
-
         initializeRoom();
-        setupListener();
-
-        return () => {
-            if (unsubscribe) unsubscribe();
-        };
     }, [playerId]);
 
-    const handleInputChange = (promptId, value) => {
-        setResponses(prev => ({ ...prev, [promptId]: value }));
-    };
+    useEffect(() => {
+        if (!roomId) return;
+        console.log("refreshing")
 
-    const handleSubmit = async (promptId) => {
+        const roomDocRef = doc(db, 'rooms', roomId);
+        let previousPromptIds = new Set();
+
+        const unsubscribe = onSnapshot(roomDocRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const fetchedPrompts = await getAvailablePromptsForPlayer(playerId);
+                const prefilledPrompts = await replacePlaceholdersInPrompts(fetchedPrompts, roomId);
+
+                const newPrompts = prefilledPrompts.filter(p => !previousPromptIds.has(p.id));
+
+                if (newPrompts.length > 0) {
+                    setPrompts(prevPrompts => [...prevPrompts, ...newPrompts]);
+                    previousPromptIds = new Set([...previousPromptIds, ...newPrompts.map(p => p.id)]);
+                }
+
+                const roomData = await getRoomDataFromRoomId(roomId);
+                const allPlayerDataPromises = roomData.players.map(playerId => getPlayerDataFromPlayerId(playerId));
+                const allPlayerData = await Promise.all(allPlayerDataPromises);
+                const allPrompts = allPlayerData.flatMap(playerData => playerData ? playerData.prompts : []);
+                const allPromptsAnswered = allPrompts.every(promptId => roomData.responses && roomData.responses[promptId]);
+
+                // TODO: this is a shitty cheat. We expect there to be at least 1 prompt, so if there's not, then
+                // do not navigate to the teleprompter just yet.
+                const isPromptsLoaded = allPrompts.length > 0;
+                if (allPromptsAnswered && isPromptsLoaded) {
+                    navigate('/teleprompter');
+                }
+            }
+        });
+
+        return () => unsubscribe();
+    }, [roomId, playerId, navigate]);
+
+    const handleInputChange = useCallback((promptId, value) => {
+        setResponses(prev => ({ ...prev, [promptId]: value }));
+    }, []);
+
+    const handleSubmit = async (promptId, e) => {
+        e.preventDefault();
         const roomId = await getRoomIdFromPlayerId(playerId);
 
         if (roomId && responses[promptId]) {
@@ -61,21 +78,9 @@ export default function PromptAnswering() {
                 await updateDoc(roomDocRef, {
                     [`responses.${promptId}`]: responses[promptId]
                 });
-
-                setPrompts(prevPrompts => prevPrompts.filter(prompt => prompt.id !== promptId));
-
-                const roomData = await getRoomDataFromRoomId(roomId);
-
-                const allPrompts = roomData.players.flatMap(playerId => {
-                    const playerData = roomData.playersData[playerId];
-                    return playerData ? playerData.prompts : [];
-                });
-
-                const allPromptsAnswered = allPrompts.every(promptId => roomData.responses && roomData.responses[promptId]);
                 
-                if (allPromptsAnswered) {
-                    navigate('/teleprompter');
-                }
+                //remove answered prompt
+                setPrompts(prevPrompts => prevPrompts.filter(prompt => prompt.id !== promptId));
             } catch (error) {
                 console.error('Error submitting response:', error);
             }
@@ -90,27 +95,31 @@ export default function PromptAnswering() {
             <div className="flex justify-center items-center">
                 <div className="w-full max-w-2xl p-4">
                     {prompts.length === 0 ? (
-                                <div className="flex-center mt-4">
-                                <p>Hold tight! Waiting on other players to submit answers</p>
-                                <div className="typing-loader ml-3"></div>
-                            </div>
+                        <div className="flex-center mt-4">
+                            <p>Hold tight! Waiting on other players to submit answers</p>
+                            <div className="typing-loader ml-3"></div>
+                        </div>
                     ) : (
-                        prompts.map((prompt, index) => (
-                            <div className='flex flex-col items-center mt-6' key={index}>
-                                <p>{prompt.description}</p>
-                                <div className="w-full">
-                                    <textarea
-                                        type="text"
-                                        placeholder=" "
-                                        value={responses[prompt.id] || ''}
-                                        onChange={(e) => handleInputChange(prompt.id, e.target.value)}
-                                        className="text-black w-full md:w-1/2"
-                                    ></textarea>
-                                    <br />
-                                    <button className='btn btn-accent btn-tall mt-1 w-full md:w-1/2' onClick={() => handleSubmit(prompt.id)}>Submit</button>
-                                </div>
-                            </div>
-                        ))
+                        prompts.map((prompt, index) => {
+                            // cache the prompt ID so if the page refreshes we remember what it is and the contents
+                            if (!refreshShit[prompt.id]) {
+                                refreshShit[prompt.id] = (<div className='flex flex-col items-center mt-6' key={prompt.id}>
+                                    <p>{prompt.description}</p>
+                                    <div className="w-full">
+                                        <textarea
+                                            type="text"
+                                            placeholder=" "
+                                            value={responses[prompt.id] || ''}
+                                            onChange={(e) => handleInputChange(prompt.id, e.target.value)}
+                                            className="text-black w-full md:w-1/2"
+                                        ></textarea>
+                                        <br />
+                                        <button className='btn btn-accent btn-tall mt-1 w-full md:w-1/2' onClick={(e) => handleSubmit(prompt.id, e)}>Submit</button>
+                                    </div>
+                                </div>);
+                            }
+                            return refreshShit[prompt.id];
+                        })
                     )}
                 </div>
             </div>

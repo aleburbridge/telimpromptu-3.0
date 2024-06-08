@@ -31,7 +31,7 @@ export interface RoomData {
   
   export interface Player {
     id: string;
-    name: string;
+    playerName: string;
     topicVote: string;
     role?: string;
   }

@@ -164,11 +164,14 @@ export async function getAvailablePromptsForPlayer(playerId) {
         const roomData = await getRoomDataFromRoomId(roomId);
         
         const promptIds = playerData.prompts;
+        console.log(roomData.segmentIds);
         console.log("Prompt IDs assigned to player:", promptIds);
         const allPrompts = segments.filter(s => roomData.segmentIds.includes(s.id)).reduce((acc, segment) => [...acc, ...segment.prompts.map(p => getAllPrompts(p)).flat()], []);
-        
+        console.log(allPrompts);
         // Filter out prompts that have already been responded to
         const answeredPrompts = roomData.responses || {};
+
+        console.log(answeredPrompts, promptIds, allPrompts);
 
         const availablePrompts = allPrompts.filter(prompt => {
             if (!promptIds.includes(prompt.id)) return false;
@@ -179,6 +182,7 @@ export async function getAvailablePromptsForPlayer(playerId) {
             // Check for dependencies in the description ({!... })
             const dependencyMatches = prompt.description.match(/\{!(.*?)\}/g);
             if (!dependencyMatches) return true;
+            console.log(dependencyMatches);
             
             return dependencyMatches.every(dependency => {
                 const dependentPromptId = dependency.replace(/[{}!]/g, '');

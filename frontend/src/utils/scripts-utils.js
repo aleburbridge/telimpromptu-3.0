@@ -1,4 +1,3 @@
-import { segments } from "../script-building/segments";
 import { getPlayersInRoom, getRoomDataFromRoomId } from "./room-utils";
 
 // call this every time someone answers a prompt
@@ -188,68 +187,53 @@ export function interpolateScriptLineContent(text, gameVariables, players, promp
   return outputText;
 }
 
-export async function buildScriptForTeleprompter(segmentIds, responses, roomId) {
-  const script = [];
+export async function replaceSpeakerInPrompts(prompts, roomId) {
   const players = await getPlayersInRoom(roomId);
-  const roomData = await getRoomDataFromRoomId(roomId);
-  const gameVariables = { headline: roomData.headline };
-
   const getPlayerNameByRole = (role) => {
     const player = players.find(p => p.role.toLowerCase() === role.toLowerCase());
-    return player ? `${player.name} ${player.lastname}` : role;
+    return player ? `${player.playerName}` : role;
   };
 
-  for (const segmentId of segmentIds) {
-    const segment = segments.find(seg => seg.id === segmentId);
-    if (!segment) continue;
-
-    for (const line of segment.lines) {
-      let content = line.content;
-      content = interpolateScriptLineContent(content, gameVariables, players, responses);
-
-      // Replace role with player name
-      const speakerName = getPlayerNameByRole(line.speaker);
-
-      script.push({ speaker: speakerName, content });
-    }
-  }
-
-  return script;
+  return prompts.map(prompt => {
+    return {...prompt, speaker: getPlayerNameByRole(prompt.speaker)}
+  });
 }
+  
 
 export async function replacePlaceholdersInPrompts(prompts, roomId) {
   try {
-      const roomData = await getRoomDataFromRoomId(roomId);
-      const responses = roomData.responses || {};
-      const players = await getPlayersInRoom(roomId);
+    const roomData = await getRoomDataFromRoomId(roomId);
+    const responses = roomData.responses || {};
+    const players = await getPlayersInRoom(roomId);
 
-      const namesMapping = {};
-      const lastNamesMapping = {};
-      players.forEach(player => {
-          namesMapping[player.role] = player.playerName;
-          lastNamesMapping[player.role] = player.lastName;
-      });
+    const namesMapping = {};
+    const lastNamesMapping = {};
+    players.forEach(player => {
+      namesMapping[player.role] = player.playerName;
+      lastNamesMapping[player.role] = player.lastName;
+    });
 
-      return prompts.map(prompt => {
-          let prefilledDescription = prompt.description || prompt.content;
-          const matches = prefilledDescription.match(/\{!(.*?)\}/g);
+    return prompts.map(prompt => {
+      let prefilledDescription = prompt.description || prompt.content;
+      const matches = prefilledDescription.match(/\{!(.*?)\}/g);
 
-          if (matches) {
-              matches.forEach(match => {
-                  const promptId = match.replace(/[{}!]/g, '');
-                  prefilledDescription = prefilledDescription.replace(match, responses[promptId] || match);
-              });
-          }
+      if (matches) {
+        matches.forEach(match => {
+          const promptId = match.replace(/[{}!]/g, '');
+          prefilledDescription = prefilledDescription.replace(match, responses[promptId] || match);
+        });
+      }
 
-          prefilledDescription = prefilledDescription
-              .replace(/\{@(\w+)\}/g, (_, role) => namesMapping[role] || `{@${role}}`)
-              .replace(/\{@(\w+)-lastname\}/g, (_, role) => lastNamesMapping[role] || `{@${role}-lastname}`)
-              .replace(/\{#(\w+)\}/g, (_, variable) => roomData[variable] || `#{${variable}}`);
+      prefilledDescription = prefilledDescription
+        .replace(/\{@(\w+)\}/g, (_, role) => namesMapping[role] || `{@${role}}`)
+        .replace(/\{@(\w+)-lastname\}/g, (_, role) => lastNamesMapping[role] || `{@${role}-lastname}`)
+        .replace(/\{#(\w+)\}/g, (_, variable) => roomData[variable] || `{#${variable}}`)
+        .replace(/\{#mother-of\}/g, roomData.motherOf || `{#mother-of}`);
 
-          return { ...prompt, description: prefilledDescription, content: prefilledDescription };
-      });
+      return { ...prompt, description: prefilledDescription, content: prefilledDescription };
+    });
   } catch (error) {
-      console.error('Error pre-filling prompts:', error);
-      return prompts;
+    console.error('Error pre-filling prompts:', error);
+    return prompts;
   }
 }

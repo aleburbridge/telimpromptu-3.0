@@ -11,17 +11,31 @@ export default function CreateRoomForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [initialRoomName, setInitialRoomName] = useState('');
 
-    useEffect(() => {
+    const generateWordSlug = () => {
         let wordSlug = generateSlug(2, { format: 'title' });
 
-        if (wordSlug.endsWith('y')) {
+        if (wordSlug.toLowerCase().endsWith('boy')) {
+            wordSlug = wordSlug + 's';
+        } else if (wordSlug.endsWith('y')) {
             wordSlug = wordSlug.slice(0, -1) + 'ies';
+        } else if (wordSlug.endsWith('ch')) {
+            wordSlug = wordSlug + 'es';
+        } else if (wordSlug.endsWith('s')) {
+            // do nothing
         } else {
             wordSlug = wordSlug + 's';
         }
+        
+        return wordSlug;
+    };
 
-        setInitialRoomName(wordSlug);
+    useEffect(() => {
+        setInitialRoomName(generateWordSlug());
     }, []);
+
+    const handleRegenerate = () => {
+        setInitialRoomName(generateWordSlug());
+    };
 
     const handleSubmit = async (e) => {
         setIsLoading(true);
@@ -52,7 +66,6 @@ export default function CreateRoomForm() {
         }
     };
 
-
     return (
         <form className='container-inner mx-auto' onSubmit={handleSubmit}>
             {error && <p className='text-red-500'>{error}</p>}
@@ -65,15 +78,24 @@ export default function CreateRoomForm() {
                     required
                 />
             </div>
-            <div>
+            <div className='relative'>
                 <input
                     className='input w-full mt-2 text-black'
                     type='text'
                     name='roomName'
-                    defaultValue={initialRoomName}
+                    value={initialRoomName}
+                    onChange={(e) => setInitialRoomName(e.target.value)}
                     placeholder='Room Name'
                     required
                 />
+                <button
+                    type='button'
+                    onClick={handleRegenerate}
+                    className='absolute top-4 right-4 text-xl text-black'
+                    title='Regenerate Room Name'
+                >
+                    ↺
+                </button>
             </div>
             <div>
                 <input

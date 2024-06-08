@@ -10,13 +10,16 @@ export default function AllRoomsList() {
     useEffect(() => {
         const roomsCollectionRef = collection(db, 'rooms');
         const unsubscribe = onSnapshot(roomsCollectionRef, (snapshot) => {
-            const rooms = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })).sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+            const rooms = snapshot.docs
+                .map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }))
+                .filter(room => room.isJoinable !== false)
+                .sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
             setRoomsList(rooms);
         });
-
+        
         return () => unsubscribe();
     }, []);
 

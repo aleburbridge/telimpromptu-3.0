@@ -51,7 +51,7 @@ export function aggregateScriptData(segmentIds) {
     for (const segmentId of segmentIds) {
         const eligibleSegments = segments.filter(s => s.id === segmentId);
         if (eligibleSegments.length !== 1) {
-            throw new Error("CAN'T BUILD THE SCRIPT");
+            throw new Error(`CAN'T BUILD THE SCRIPT (basic script builder), ${segmentId} does not exist`);
         }
         script.lines.push(...eligibleSegments[0].lines);
         script.prompts.push(...eligibleSegments[0].prompts);
