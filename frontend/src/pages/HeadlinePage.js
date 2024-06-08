@@ -53,13 +53,16 @@ export default function HeadlinePage() {
         const unsubscribe = onSnapshot(roomDocRef, (docSnapshot) => {
             const roomData = docSnapshot.data();
             console.log("Room data: ", roomData);
+
             if (roomData && roomData.headline) {
+                console.log("Navigating to /prompt-answering");
                 navigate('/prompt-answering');
+                console.log("navigated to prompt page");
             }
         });
 
         return () => unsubscribe();
-    }, [roomId, navigate]);
+    }, [roomId, navigate])
 
     const handleInputChange = (event) => {
         setHeadline(event.target.value);
@@ -101,7 +104,7 @@ export default function HeadlinePage() {
 
             {isUserHeadlineWriter && (
                 <>
-                    <p className='text-xl mt-2'>You are the headline writer!</p>
+                    <p className='mt-2'>You are the headline writer. Write the headline of the big story below.</p>
                     <textarea
                         type="text"
                         placeholder=" "
@@ -111,7 +114,7 @@ export default function HeadlinePage() {
                     <br/>
                     <button className='btn btn-primary mt-2' onClick={handleSubmit}>Submit</button>
                     <br/>
-                    <button className="mt-2 text-accent" onClick={handleIdeaRequest}>💡 Want an idea?</button>
+                    <button className="mt-6 text-accent" onClick={handleIdeaRequest}>💡 Want an idea?</button>
                     {idea && <p className='mt-2'>Idea: {idea}</p>}
                 </>
             )}

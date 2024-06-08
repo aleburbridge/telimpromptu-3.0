@@ -16,6 +16,18 @@ export async function saveRoomToDb(roomName, password) {
     }
 }
 
+export async function getRoomIdFromRoomName(roomName) {
+    const roomQuery = query(roomsCollectionRef, where('roomNameLower', '==', roomName));
+    const querySnapshot = await getDocs(roomQuery);
+    
+    if (!querySnapshot.empty) {
+        const roomDoc = querySnapshot.docs[0];
+        return roomDoc.id;
+    } else {
+        throw new Error('Room not found');
+    }
+}
+
 //TODO: REPLACE W API CALL
 export async function getRoomDataFromRoomId(roomId) {
     try {

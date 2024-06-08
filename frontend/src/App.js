@@ -38,6 +38,7 @@ function App() {
           <Route path='/prompt-answering' element={<PromptAnswering />} />
           <Route path='/teleprompter' element={<Teleprompter />} />
           <Route path='/test-page' element={<TestPage/>} />
+          <Route path='/teleprompter/:roomName' element={<Teleprompter />} />
         </Routes>
       </main>
       {!isTeleprompterPage && <Footer />}

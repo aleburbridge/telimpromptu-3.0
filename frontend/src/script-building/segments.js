@@ -1,10 +1,11 @@
-
-
 export const segmentTags = {
   introduction: "introduction",
   segment: "segment",
   closing: "closing"
 };
+
+//TODO: remove hyphens on guest expert etc
+
 
 // key:
 // {!prompt} prompts that the players fill out
@@ -47,6 +48,64 @@ export const segments = [
       { id: 'story-info-2', description: 'Details about the story, "{#headline}". We already know {!story-info-1}.' }
     ]
   },
+  {
+    tag: segmentTags.introduction,
+    id: 'intro-3',
+    topic: 'any',
+    lines: [
+      { speaker: 'Host', content: 'I\'m {@host} {@host-lastname} with Telimpropmtu news.' },
+      { speaker: 'Cohost', content: 'And I\'m {@cohost} {@cohost-lastname}. {!outburst-1}' },
+      { speaker: 'Host', content: 'True. The hot topic tonight: {#headline}. We\'ve been told {!story-info-1}' },
+      { speaker: 'Cohost', content: 'That\'s right, {@host}. We are also being told {!story-info-2}' },
+    ],
+    prompts: [
+      { id: "outburst-1", description: "An outburst the cohost will have while introducing themselves."},
+      { id: 'story-info-1', description: 'Initial details about the story, {#headline}' },
+      { id: 'story-info-2', description: 'Details about the story, "{#headline}". We already know {!story-info-1}.' }
+    ]
+  },
+  {
+    tag: segmentTags.introduction,
+    id: 'intro-4',
+    topic: 'any',
+    lines: [
+      { speaker: 'Host', content: '{!catchphrase}! I\'m {@host} {@host-lastname} with Telimpropmtu news.' },
+      { speaker: 'Cohost', content: 'And I\'m {@cohost} {@cohost-lastname}.' },
+      { speaker: 'Host', content: 'Tonight: {#headline}. We have sources that say {!story-info-1}' },
+      { speaker: 'Cohost', content: 'That\'s right, {@host}. We also know {!story-info-2}' },
+      { speaker: 'Host', content: '{!catchphrase}! Let\'s get it {@cohost}' },
+    ],
+    prompts: [
+      { id: "catchphrase", description: "A catchphrase for the host"},
+      { id: 'story-info-1', description: 'Initial details about the story, {#headline}' },
+      { id: 'story-info-2', description: 'Details about the story, "{#headline}". We already know {!story-info-1}.' }
+    ]
+  },
+
+  // ----------------- ANY -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'crime-mother',
+    topic: 'any',
+    lines: [
+      { speaker: 'Cohost', content: 'Now we want to hear from you all. Call in to the Telimpromptu News station with your thoughts on tonight\'s story and you may be featured live on the air. Lines are open.' },
+      { speaker: 'Host', content: 'And it looks like we\'re getting our first caller. Caller, you\'re on the air. What\'s your name and where are you calling from?' },
+      { speaker: 'mother', content: 'Oh hello, sweeite. I\'m {#mother-of}\'s mother and I\'m calling from {!mother-location}' },
+      { speaker: 'Cohost', content: '{#mother-of}\'s mother, what are your reactions to tonight\'s story?'},
+      { speaker: 'mother', content: '{!mother-reaction}'},
+      { speaker: 'Host', content: 'Well said, {#mother-of}\'s mother.'},
+      { speaker: 'mother', content: 'Oh, one more thing. {#mother-of}? {!mothers-plea-to-child}'},
+      { speaker: 'Cohost', content: 'That\'s all the time we have for calls. Thank you for joining us {#mother-of}\'s mother.' },
+      { speaker: 'mother', content: '{!mother-goodbye}'}
+
+    ],
+    prompts: [
+      { id: 'mother-location', description: 'The location where {#mother-of}\'s mother is calling in from' },
+      { id: 'mother-reaction', description: 'Write {#mother-of}\'s mother\'s thoughts on tonight\'s story.' },
+      { id: 'mothers-plea-to-child', description: 'Write {#mother-of}\'s mother\'s plea to {#mother-of} that they give live on the air, i.e. \'Don\'t forget to wear a sweater\''},
+      { id: 'mother-goodbye', description: 'Write {#mother-of}\'s mother\'s parting words.' },
+    ]
+  },
 
   // ----------------- GUEST EXPERT -------------------------
   {
@@ -65,7 +124,7 @@ export const segments = [
       { speaker: 'guestexpert', content: '{!expert-initial-answer-2}, {@cohost}, and here I should add a relevant detail to the case: {!guestexpert-detail}, as I will now demonstrate. (Demonstrates)' },
       { speaker: 'Cohost', content: 'Final question, {!expert-question-3}?' },
       { speaker: 'guestexpert', content: 'I\'m sorry {@cohost}, I can\'t answer that question. When I obtained my {!expert-credentials}, I swore a solemn oath.\n(Places hand on heart)\n{!expert-oath}' },
-      { speaker: 'Host', content: 'That\'s {@guestexpert} {@guestexpertlastname}. Thank you for your time, {@guestexpert}.' },
+      { speaker: 'Host', content: 'That\'s {@guestexpert} {@guestexpert-lastname}. Thank you for your time, {@guestexpert}.' },
       { speaker: 'guestexpert', content: 'Thank you.' }
     ],
     prompts: [
@@ -100,7 +159,7 @@ export const segments = [
     id: 'guestexpert-2',
     topic: 'any',
     lines: [
-      { speaker: 'Cohost', content: '{@guestexpert} {@guestexpert-lastname} has agreed to an exclusive interview with Telimpromptu News. He is a distinguished professional and has a {!expert-credentials}. {@guestexpert} {@guestexpertlastname}, thank you for joining us.' },
+      { speaker: 'Cohost', content: '{@guestexpert} {@guestexpert-lastname} has agreed to an exclusive interview with Telimpromptu News. He is a distinguished professional and has a {!expert-credentials}. {@guestexpert} {@guestexpert-lastname}, thank you for joining us.' },
       { speaker: 'guestexpert', content: 'It\'s a pleasure to be here.' },
       { speaker: 'Cohost', content: '{@guestexpert}, in your professional opinion, what do you make of this story?' },
       { speaker: 'guestexpert', content: 'Well, {!phony-expert-answer1}.' },
@@ -266,13 +325,13 @@ export const segments = [
     topic: 'politics',
     lines: [
       { speaker: 'Host', content: 'We now go live to our political correspondent {@politicalcorrespondent} for an update on the current political climate. What\'s the latest?' },
-      { speaker: 'Political Correspondent', content: 'Thanks, {@host}. The atmosphere here is electric as {!political-event} unfolds.' },
+      { speaker: 'politicalcorrespondent', content: 'Thanks, {@host}. The atmosphere here is electric as {!political-event} unfolds.' },
       { speaker: 'Host', content: 'How are people reacting to this event?' },
-      { speaker: 'Political Correspondent', content: 'Well, reactions are mixed. Some people are saying {!public-reaction1}, while others believe {!public-reaction2}.' },
+      { speaker: 'politicalcorrespondent', content: 'Well, reactions are mixed. Some people are saying {!public-reaction1}, while others believe {!public-reaction2}.' },
       { speaker: 'Host', content: 'That\'s quite a divide. Any predictions on the outcome?' },
-      { speaker: 'Political Correspondent', content: 'It\'s hard to say, but many experts think that {!expert-prediction}.' },
+      { speaker: 'politicalcorrespondent', content: 'It\'s hard to say, but many experts think that {!expert-prediction}.' },
       { speaker: 'Host', content: 'Thank you for the update, {@politicalcorrespondent}.' },
-      { speaker: 'Political Correspondent', content: 'My pleasure, {@host}.' }
+      { speaker: 'politicalcorrespondent', content: 'My pleasure, {@host}.' }
     ],
     prompts: [
       { id: 'political-event', description: 'Describe the political event currently unfolding. Context: \'The atmosphere here is electric as (your text here) unfolds.\'' },
@@ -288,17 +347,17 @@ export const segments = [
   },
   {
     tag: segmentTags.segment,
-    id: 'guestexpert-1',
+    id: 'guestexpert-politics-1',
     topic: 'politics',
     lines: [
       { speaker: 'Host', content: 'We\'re pleased to welcome our guest expert, {@guestexpert}, to provide some insights on the current political scenario. What are your thoughts?' },
-      { speaker: 'Guest Expert', content: 'Thank you, {@host}. I believe that {!expert-opinion1}.' },
+      { speaker: 'guestexpert', content: 'Thank you, {@host}. I believe that {!expert-opinion1}.' },
       { speaker: 'Host', content: 'That\'s interesting. Can you expand on that?' },
-      { speaker: 'Guest Expert', content: 'Of course. The data shows that {!expert-opinion2}.' },
+      { speaker: 'guestexpert', content: 'Of course. The data shows that {!expert-opinion2}.' },
       { speaker: 'Cohost', content: 'What impact do you think this will have on the upcoming elections?' },
-      { speaker: 'Guest Expert', content: 'It\'s likely that {!election-impact}.' },
+      { speaker: 'guestexpert', content: 'It\'s likely that {!election-impact}.' },
       { speaker: 'Host', content: 'Thank you for your valuable insights, {@guestexpert}.' },
-      { speaker: 'Guest Expert', content: 'Happy to share, {@host}.' }
+      { speaker: 'guestexpert', content: 'Happy to share, {@host}.' }
     ],
     prompts: [
       { id: 'expert-opinion1', description: 'Write the guest expert\'s initial opinion on the current political scenario. Context: \'I believe that (your text here)\'' },
@@ -334,13 +393,13 @@ export const segments = [
     topic: 'sports',
     lines: [
       { speaker: 'Host', content: 'We\'re live with Coach {@coach}. How are things shaking up at the stadium today?' },
-      { speaker: 'Coach', content: 'Exciting times, {@host}! I\'m happy to unveil a new cheer to rally the fans! I call it {!new-cheer}' },
-      { speaker: 'Host', content: '{!new-cheer}? What do fans do?' },
+      { speaker: 'Coach', content: 'Exciting times, {@host}! I\'m happy to unveil a new cheer to rally the fans! I call it {!new-cheer-name}' },
+      { speaker: 'Host', content: '{!new-cheer-name}? What do fans do?' },
       { speaker: 'Coach', content: '{!cheer-description}' },
       { speaker: 'Host', content: '{!host-exclamation}, that must be quite the sight!' },
       { speaker: 'Coach', content: 'Oh, it is.' },
       { speaker: 'Cohost', content: 'Could you give us a demonstration?' },
-      { speaker: 'Coach', content: 'I\'d be happy to. (demonstrates)' },
+      { speaker: 'Coach', content: 'I\'d be happy to. (demonstrates)\n\n\n\n\n\n\n' },
       { speaker: 'Host', content: 'I think I\'ll give it a try! (demonstrates)' },
       { speaker: 'Cohost', content: 'Coach {@coach}, thank you for your time.' },
     ],
@@ -348,6 +407,90 @@ export const segments = [
       { id: 'new-cheer-name', description: 'The name of a new cheer that the coach will introduce for the fans to perform at the game.' },
       { id: 'cheer-description', description: 'Describe what a cheer called {!new-cheer-name} involves. E.g. \'Fans beat their chest and chant \'HOOT GROWL HOOT GROWL\'' },
       { id: 'host-exclamation', description: 'An exclamation the host says.' }
+    ]
+  },
+  {
+    tag: segmentTags.segment,
+    id: "player-1",
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'We\'re live with Player {@player}. How\'s it hanging {!player-nickname-1}?' },
+      { speaker: 'Player', content: '{!player-one-liner}! How did you know I\'m called {!player-nickname-1}?' },
+      { speaker: 'Cohost', content: 'Everyone knows you\'re called {!player-nickname-1} because {!player-nickname-origin}' },
+      { speaker: 'Player', content: '{!player-one-liner}! You\'re alright man.' },
+      { speaker: 'Host', content: 'Hah, yeah, {!cool-phrase}!' },
+      { speaker: 'Cohost', content: '{@player-nickname-1}, how did you prepare for today\'s massive game?' },
+      { speaker: 'Player', content: 'Definitely. So first I {!preparation-1}?' },
+      { speaker: 'Host', content: 'No way.' },
+      { speaker: 'Player', content: 'That\'s just the start. I followed it up by {!preparation-2}?' },
+      { speaker: 'Host', content: 'Wow.' },
+      { speaker: 'Cohost', content: 'Incredible. Thanks for your time {!player-nickname-1}' },
+      { speaker: 'Player', content: 'Totally. {!player-one-liner}' },
+    ],
+    prompts: [
+      {
+        groupId: 'nickname',
+        subPrompts: [
+          { id: 'player-nickname-1', description: 'A nickname for {@player}, a player in the sports story tonight.' },
+          { id: 'player-nickname-origin', description: 'The reason the player is called {!player-nickname-1}.\nContext: "Everyone knows you\'re called {!player-nickname-1} because (your text here)."' }
+        ]
+      },
+      {
+        id: 'player-one-liner', description: 'A one-liner the player will say'
+      },
+      {
+        id: 'cool-phrase', description: "A cool phrase."
+      },
+      {
+        id: 'preparation-1', description: 'What did the player to do to prepare for the game today?'
+      },
+      {
+        id: 'preparation-2', description: 'What did the player to do to prepare for the game today?'
+      }
+    ]
+  },
+  {
+    tag: segmentTags.segment,
+    id: "fan-1",
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here now with a fan of the event tonight, {@fan}. How are you liking the event?' },
+      { speaker: 'Fan', content: 'How do I like it?! {!reaction}' },
+      { speaker: 'Cohost', content: 'Sounds like you\'re getting in the spirit! What was the most memorable part of the game tonight?' },
+      { speaker: 'Fan', content: 'Oh, it was definitely when {!memorable-event-1}' },
+      { speaker: 'Cohost', content: 'Rad! Mine was {!memorable-event-2}' },
+      { speaker: 'Host', content: 'Sounds like we have a fan right here in the studio!' },
+      { speaker: 'Cohost', content: 'Me? I\'ve been waiting for this event for over {!time-amount}' },
+      { speaker: 'Fan', content: 'No way. You are a fake fan.' },
+      { speaker: 'Cohost', content: 'Listen pal. Nobody is a bigger fan of this event than me.' },
+      { speaker: 'Fan', content: 'Oh yeah? Who are your favorite players then?' },
+      { speaker: 'Cohost', content: 'Ummm... {!fake-name-1}, {!fake-name-2}, ... definitely {!fake-name-3}' },
+      { speaker: 'Fan', content: 'Woah.. you know about {!fake-name-3}?' },
+      { speaker: 'Cohost', content: 'Fo sho.' },
+      { speaker: 'Host', content: 'Get a room you two!' },
+    ],
+    prompts: [
+      {
+        id: 'reaction', description: 'A fan\'s reaction to the event tonight. Context: "How do I like it?! (your text here)"'
+      },
+      {
+        id: 'memorable-event-1', description: "An event that happened during tonight's game"
+      },
+      {
+        id: 'memorable-event-2', description: "An event that happened during tonight's game"
+      },
+      {
+        id: 'time-amount', description: 'An amount of time (e.g. "1 minute", "1 year"'
+      },
+      {
+        id: 'fake-name-1', description: 'An obviously fake player name'
+      },
+      {
+        id: 'fake-name-2', description: 'An obviously fake player name. Previous names: {!fake-name-1}'
+      },
+      {
+        id: 'fake-name-3', description: 'An obviously fake player name. Previous names: {!fake-name-1}, {!fake-name-2}'
+      },
     ]
   },
 
@@ -380,9 +523,27 @@ export const segments = [
         groupId: 'musical-reference',
         subPrompts: [
           { id: 'musical-artist', description: 'The person who the quote is attributed to.' },
-          { id: 'cohost-lyric', description: 'A quote that the {@cohost} will say that somehow relates to tonight\'s story' }
+          { id: 'cohost-lyric', description: 'A quote that {@cohost} will say that somehow relates to tonight\'s story' }
         ]
       }
     ]
-  }
+  },
+  {
+    tag: segmentTags.closing,
+    id: 'closing-mother',
+    topic: 'any',
+    lines: [
+      { speaker: 'Host', content: 'Here to close the story out is {#mother-of}\'s mother! {#mother-of}\'s mother, thank you for joining us on Telimpromptu News.' },
+      { speaker: 'mother', content: '{!mother-greeting}' },
+      { speaker: 'Cohost', content: 'Haha. {#mother-of}\'s mother, what did you think of tonight\'s story?' },
+      { speaker: 'mother', content: 'Well young man, I have to say I especially liked the part when {!mothers-favorite-part}' },
+      { speaker: 'Host', content: 'That was my favorite part too. {#mother-of}\'s mother, I was hoping you could tell us what we can all take away from this story' },
+      { speaker: 'mother', content: '{!mother-moral}'}
+    ],
+    prompts: [
+      { id: 'mother-greeting', description: 'Write {#mother-of}\'s mother\'s greeting upon going live on air.' },
+      { id: 'mothers-favorite-part', description: 'Write {#mother-of}\'s mother\'s favorite part of the story. Context: \'I especially liked the part when (your text here)\'' },
+      { id: 'mother-moral', description: 'Write the moral of the story that {#mother-of}\'s mother will say at the end of the broadcast.'}
+    ]
+  },
 ]

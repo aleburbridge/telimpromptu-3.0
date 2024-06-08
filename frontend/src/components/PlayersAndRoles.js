@@ -9,6 +9,7 @@ function capitalize(s)
 
 export default function PlayersAndRoles({ roomId }) {
     const [players, setPlayers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (roomId === null || roomId === "") {
@@ -23,8 +24,10 @@ export default function PlayersAndRoles({ roomId }) {
                 if (response.data) {
                     setPlayers(response.data);
                 }
+                setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching players: ", error);
+                setIsLoading(false);
                 return
             }
         };
@@ -35,11 +38,22 @@ export default function PlayersAndRoles({ roomId }) {
 
     return (
         <div className='bg-[rgb(52,52,92)] p-2.5 rounded-md overflow-y-auto mt-2 inline-block'>
+            {
+            isLoading ?         
+            <div className="flex-center">
+            <div className="lds-spinner">
+                <div></div><div></div><div></div><div></div><div></div>
+                <div></div><div></div><div></div><div></div><div></div>
+                <div></div><div></div>
+            </div>
+            </div> 
+            :             
             <ul>
                 {players.map(player => (
                     <li key={player.id}><span className='font-bold'>{capitalize(player.role) || ''}:</span> {player.playerName}</li>
                 ))}
             </ul>
+            }
         </div>
     );
 }

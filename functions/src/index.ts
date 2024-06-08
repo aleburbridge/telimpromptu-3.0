@@ -144,19 +144,18 @@ export async function getRolesInRoom(roomId: string) {
 // ---------- GAME FUNCTIONS ---------------
 
 enum Topics {
-  News = 'news',
+  Any = 'any',
   Sports = 'sports',
   Politics = 'politics',
   Crime = 'crime',
-  Other = 'other'
+  Other = 'any'
 }
 
-const topicToRolesMap = new Map<Topics, string[]>([
-  [Topics.News, ['reporter', 'editor', 'camera operator']],
-  [Topics.Sports, ['player', 'coach', 'fan', 'analyst']],
-  [Topics.Politics, ['politician', 'political-correspondent', 'campaign-strategist', 'local-person']],
-  [Topics.Crime, ['criminal', 'detective', 'witness', 'criminologist']],
-  [Topics.Other, ['players mother', 'man', 'lad']]
+const topicToRolesMap = new Map<string, string[]>([
+  [Topics.Any.toLowerCase(), ['fieldreporter', 'guestexpert', 'mother']],
+  [Topics.Sports.toLowerCase(), ['player', 'coach', 'fan', 'analyst']],
+  [Topics.Politics.toLowerCase(), ['politician', 'politicalcorrespondent', 'campaignstrategist']],
+  [Topics.Crime.toLowerCase(), ['criminal', 'detective', 'witness', 'criminologist', 'guestexpert']],
 ]);
 
 // checks if all topics are in then tallies the votes when they are
@@ -275,6 +274,7 @@ export const onTopicAssigned = functions.firestore
     return null;
   }
 
+
   try {
     await assignRoles(roomId);
 
@@ -299,6 +299,9 @@ export const onTopicAssigned = functions.firestore
     const roles = await getRolesInRoom(roomId);
     if (!roles || roles.length === 0) {
       throw new Error(`Roles are missing or empty for room ID ${roomId}`);
+    }
+    if (roomData.segments) {
+      throw new Error("should not re-generate while segments have already been assigned.");
     }
 
     const script = await buildScript(roomId, topic, roles);
@@ -325,53 +328,71 @@ export const onTopicAssigned = functions.firestore
 
   return null;
 });
-
-
 const assignRoles = async (roomId: string) => {
   try {
-      const roomData = await getRoomDataFromRoomId(roomId);
-      if (!roomData || !roomData.topic) {
-        // CHRIS - I think this should throw cos it's attempting to modify something that doesn't exist
-        // Right now it silently fails
-          console.error('Room data is incomplete or topic is missing:', roomData);
-          return;
+    const roomData = await getRoomDataFromRoomId(roomId);
+    if (!roomData || !roomData.topic) {
+      throw new Error('Room data is incomplete or topic is missing');
+    }
+
+    const topic = roomData.topic as Topics;
+    console.log("the topic is ", topic, roomData.topic);
+    const specificRoles = topicToRolesMap.get(topic.toLowerCase()) || [];
+    const anyRoles = topicToRolesMap.get(Topics.Any.toLowerCase()) || [];
+    const rolesSet = new Set([...specificRoles, ...anyRoles]);
+    console.log("umm", specificRoles, rolesSet, topicToRolesMap, topic, topicToRolesMap.has(topic));
+    const roles = Array.from(rolesSet);
+    console.log("the eligible roles are ", roles);
+
+    // Shuffle roles
+    for (let i = roles.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
+      [roles[i], roles[randomIndex]] = [roles[randomIndex], roles[i]];
+    }
+
+    const roomPlayersQuery = playersCollectionRef.where('roomId', '==', roomId);
+    const querySnapshot = await roomPlayersQuery.get();
+    const players: Player[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Player[];
+
+    let motherPlayer: Player | null = null;
+    let randomPlayerName = '';
+
+    for (const [index, player] of players.entries()) {
+      let role = '';
+      if (index === 0) {
+        role = 'host';
+      } else if (index === 1) {
+        role = 'cohost';
+      } else {
+        role = roles[index - 2] || 'viewer';
       }
 
-      const topic = roomData.topic as Topics;
-      console.log("here is da topic", topic)
-      const roles = topicToRolesMap.get(topic.toLowerCase() as Topics) || [];
-      console.log("here are da roles", roles)
-      // Shuffle roles
-      for (var i = 0 ; i < roles.length ; i++) {
-        let randomIndex = Math.floor(Math.random() * i);
-        [roles[i], roles[randomIndex]] = [roles[randomIndex], roles[i]];
+      const playerDocRef = playersCollectionRef.doc(player.id);
+      const lastName = getRandomLastName(role);
+
+      if (role === 'mother') {
+        motherPlayer = player;
       }
 
-      const roomPlayersQuery = playersCollectionRef.where('roomId', '==', roomId);
-      const querySnapshot = await roomPlayersQuery.get();
-      const players = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log("players are", players)
-      for (const [index, player] of players.entries()) {
-          let role = '';
-          if (index === 0) {
-              role = 'host';
-          } else if (index === 1) {
-              role = 'cohost';
-          } else {
-              role = roles[index - 2] || 'viewer';
-          }
+      await playerDocRef.update({ role: role, lastName: lastName });
+    }
 
-          console.log(`Assigning role ${role} to player ${player.id}`);
+    if (motherPlayer) {
+      const otherPlayers = players.filter(player => player.id !== motherPlayer!.id);
+      const randomPlayer = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+      randomPlayerName = randomPlayer ? randomPlayer.playerName : '';
 
-          const playerDocRef = playersCollectionRef.doc(player.id);
-          const lastName = getRandomLastName(role);
-          await playerDocRef.update({ role: role, lastName: lastName });
+      if (randomPlayerName) {
+        const roomDocRef = roomsCollectionRef.doc(roomId);
+        await roomDocRef.update({ motherOf: randomPlayerName });
       }
+    }
   } catch (error) {
-      console.error('Error assigning roles:', error);
+    console.error('Error assigning roles:', error);
   }
 }
 
+export default assignRoles;
 const getRandomLastName = (role: string) => {
   const roleEntry = roleToLastNameList.find(entry => entry.role === role);
   if (roleEntry) {
@@ -490,17 +511,16 @@ function generateListOfSegmentIds(topic: string, maxNumSegments: number, roles: 
 }
 
 function aggregateScriptData(segmentIds: string[]): Script {
-const script: Script = { lines: [], prompts: [] };
-
-for (const segmentId of segmentIds) {
-    const eligibleSegments = segments.filter(s => s.id === segmentId);
+  const script: Script = { lines: [], prompts: [] };
+  for (const segmentId of segmentIds) {
+    const eligibleSegments = segments.filter(s => s.id.toLowerCase() === segmentId.toLowerCase());
     if (eligibleSegments.length !== 1) {
-        throw new Error("CAN'T BUILD THE SCRIPT");
+        throw new Error(`CAN'T BUILD THE SCRIPT, ${segmentId} does not exist`);
     }
     script.lines.push(...eligibleSegments[0].lines);
     script.prompts.push(...eligibleSegments[0].prompts);
-    }
-    return script;
+  }
+  return script;
 }
 
 async function buildScript(roomId: string, topic: string, roles: string[]): Promise<Script> {

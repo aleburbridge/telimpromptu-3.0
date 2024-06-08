@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getRoomIdFromPlayerId } from '../utils/player-utils';
-import { getRoomDataFromRoomId } from '../utils/room-utils';
+import { getRoomDataFromRoomId, getRoomIdFromRoomName } from '../utils/room-utils';
 import { getSegmentData } from '../script-building/BasicScriptBuilder';
-import { replacePlaceholdersInPrompts } from '../utils/scripts-utils';
+import { replacePlaceholdersInPrompts, replaceSpeakerInPrompts } from '../utils/scripts-utils';
+import { useParams } from 'react-router-dom';
 
 export default function Teleprompter() {
     const [script, setScript] = useState([]);
@@ -13,10 +14,17 @@ export default function Teleprompter() {
     const [roomId, setRoomId] = useState('');
     const teleprompterRef = useRef(null);
     const scrollInterval = useRef(null);
+    const { roomName } = useParams();
 
     useEffect(() => {
         const initializeRoom = async () => {
-            const roomId = await getRoomIdFromPlayerId(localStorage.getItem('playerId'));
+            let roomId;
+            if (roomName) {
+                console.log("room name is", roomName)
+                roomId = await getRoomIdFromRoomName(roomName);
+            } else {
+                roomId = await getRoomIdFromPlayerId(localStorage.getItem('playerId'));
+            }
             setRoomId(roomId);
             const roomData = await getRoomDataFromRoomId(roomId);
             const scriptSegments = await fetchScript(roomData.segmentIds, roomId);
@@ -32,7 +40,7 @@ export default function Teleprompter() {
         };
 
         initializeRoom();
-    }, []);
+    }, [roomName]);
 
     useEffect(() => {
         if (teleprompterRef.current && !paused) {
@@ -48,9 +56,10 @@ export default function Teleprompter() {
 
     const fetchScript = async (segmentIds, roomId) => {
         const segments = await Promise.all(segmentIds.map(id => getSegmentData(id)));
-        const lines = segments.flatMap(segment => segment.lines.map(line => ({ content: line.content })));
+        const lines = segments.flatMap(segment => segment.lines);
         const replacedLines = await replacePlaceholdersInPrompts(lines, roomId);
-        return replacedLines.map(line => line.content);
+        const replacedSpeakersAndLines = await replaceSpeakerInPrompts(replacedLines, roomId);
+        return replacedSpeakersAndLines;
     };
 
     const handleSpeedChange = async (newSpeed) => {
@@ -69,7 +78,12 @@ export default function Teleprompter() {
         <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
             <div className="teleprompter-text overflow-hidden h-4/5 w-full max-w-4xl mx-auto p-4 text-2xl leading-loose" ref={teleprompterRef}>
                 {script.map((line, index) => (
-                    <p key={index} className="mb-20">{line}</p>
+                    <div key={index}>
+                        <span className="mb-20 text-accent">{line.speaker}</span>
+                        <span className="mb-20">: {line.content}</span>
+                        <br />
+                        <br />
+                    </div>
                 ))}
             </div>
             <div className="controls mt-4 flex gap-4">
