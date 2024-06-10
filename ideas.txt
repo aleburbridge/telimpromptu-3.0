@@ -29,3 +29,9 @@ TODO:
 🪲 BUGS 🪲
 • group prompts are not displaying in order i.e. the person who the quote is attributed to comes first 
 • leaving room should delete you from database
+
+Versioning
+MAJOR.MINOR.PATCH
+MAJOR version when you make incompatible API changes,
+MINOR version when you add functionality in a backwards-compatible manner, and
+PATCH version when you make backwards-compatible bug fixes.ßß
