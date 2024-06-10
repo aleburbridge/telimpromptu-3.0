@@ -1,7 +1,7 @@
 # Telimpromptu
 
-<img src="./screenshots/screenshot.png" alt="homepage" width="50%">
-<img src="./screenshots/teleprompter.png" alt="teleprompter" width="50%">
+<img src="./screenshots/screenshot.png" alt="homepage">
+<img src="./screenshots/teleprompter.png" alt="teleprompter">
 
 \
 Telimpromptu is a free online game where players create and present whacky mad-libs style news broadcasts. Games can currently support 3-8 players, and can be played either online or in-person.
@@ -10,11 +10,6 @@ Telimpromptu is a free online game where players create and present whacky mad-l
 
 
 Go to https://telimpromptu.net to play 
-
-
-```bash
-pip install foobar
-```
 
 
 ## Contributing
