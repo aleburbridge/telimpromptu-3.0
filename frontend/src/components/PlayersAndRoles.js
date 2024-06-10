@@ -33,7 +33,6 @@ export default function PlayersAndRoles({ roomId }) {
         };
 
         fetchPlayers();
-        console.log("fetched players");
     }, [roomId]);
 
     return (

@@ -28,3 +28,4 @@ TODO:
 
 🪲 BUGS 🪲
 • group prompts are not displaying in order i.e. the person who the quote is attributed to comes first 
+• leaving room should delete you from database

@@ -33,7 +33,6 @@ export function generateListOfSegmentIds(topic, maxNumSegments, roles) {
     const closingSegments = segments.filter(s => s.tag === segmentTags.closing && segmentHasTopic(s, topic) && segmentContainsOnlyTheseRoles(s, roles));
     const chosenClosingSegment = getRandomElement(closingSegments);
     out.push(chosenClosingSegment.id);
-    console.log("built da script", out)
     return out;
 }
 

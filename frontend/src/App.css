@@ -226,11 +226,11 @@
 }
 
 .typing-loader {
-  width: 6px;  /* Adjusted size */
-  height: 6px;  /* Adjusted size */
+  width: 6px; 
+  height: 6px; 
   border-radius: 50%;
   background-color: #fff;
-  box-shadow: 12px 0 #fff, -12px 0 #fff;  /* Adjusted spacing */
+  box-shadow: 12px 0 #fff, -12px 0 #fff;  
   position: relative;
   animation: flash 0.5s ease-out infinite alternate;
 }
@@ -238,15 +238,14 @@
 @keyframes flash {
   0% {
     background-color: #FFF2;
-    box-shadow: 12px 0 #FFF2, -12px 0 #FFF;  /* Adjusted spacing */
+    box-shadow: 12px 0 #FFF2, -12px 0 #FFF; 
   }
   50% {
     background-color: #FFF;
-    box-shadow: 12px 0 #FFF2, -12px 0 #FFF2;  /* Adjusted spacing */
+    box-shadow: 12px 0 #FFF2, -12px 0 #FFF2;  
   }
   100% {
     background-color: #FFF2;
-    box-shadow: 12px 0 #FFF, -12px 0 #FFF2;  /* Adjusted spacing */
+    box-shadow: 12px 0 #FFF, -12px 0 #FFF2;  
   }
 }
-  

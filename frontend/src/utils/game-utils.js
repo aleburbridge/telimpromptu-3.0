@@ -137,7 +137,6 @@ export async function prefillScriptData(roomId, script) {
     players.forEach(player => {
         namesMapping[player.role] = player.playerName;
     });
-    console.log("namesmapping", namesMapping);
 
     const replacePlaceholders = (content) => {
         if (!content) return content;
@@ -156,7 +155,6 @@ export async function prefillScriptData(roomId, script) {
         ...prompt,
         description: replacePlaceholders(prompt.description)
     }));
-    console.log('prefilled script:', script)
     return script;
 }
 

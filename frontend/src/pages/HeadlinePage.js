@@ -52,12 +52,9 @@ export default function HeadlinePage() {
         const roomDocRef = doc(db, 'rooms', roomId);
         const unsubscribe = onSnapshot(roomDocRef, (docSnapshot) => {
             const roomData = docSnapshot.data();
-            console.log("Room data: ", roomData);
 
             if (roomData && roomData.headline) {
-                console.log("Navigating to /prompt-answering");
                 navigate('/prompt-answering');
-                console.log("navigated to prompt page");
             }
         });
 

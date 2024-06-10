@@ -264,7 +264,7 @@ export const segments: Segment[] = [
     id: 'crime-4',
     topic: 'crime',
     lines: [
-      { speaker: 'Host', content: 'In an unexpected turn of events, we have an exclusive interview with the criminal {@criminal} who has agreed to speak with us. {@criminal}, why did you commit this crime?' },
+      { speaker: 'Host', content: 'In an unexpected turn of events, we have an exclusive interview with the perpetrator of the crime themself, {@criminal} who has agreed to speak with us. {@criminal}, why did you commit this crime?' },
       { speaker: 'Criminal', content: 'Well, it all started when {!criminal-reason}.' },
       { speaker: 'Cohost', content: 'That is quite a story. What do you have to say to the people watching this?' },
       { speaker: 'Criminal', content: 'To everyone out there, I want to say {!criminal-message}.' },
@@ -298,7 +298,7 @@ export const segments: Segment[] = [
       { id: 'national-security-plan', description: '{@campaignstrategist}\'s new plan for national security. i.e. \'Training squirrels\''},
       { id: 'security-initiative-name', description: 'A catchy name for a new national security initiative: {!national-security-plan}.' },
       { id: 'host-exclamation', description: 'An exclamation the host says. i.e. \'Holy toledo\'' },
-      { id: 'security-initiative-explanation', description: 'An explanation for how {!national-security-plan} will improve national security'}
+      { id: 'security-initative-explanation', description: 'An explanation for how {!national-security-plan} will improve national security'}
     ]
   },
   {
@@ -421,10 +421,10 @@ export const segments: Segment[] = [
       { speaker: 'Cohost', content: 'Everyone knows you\'re called {!player-nickname-1} because {!player-nickname-origin}' },
       { speaker: 'Player', content: '{!player-one-liner}! You\'re alright man.' },
       { speaker: 'Host', content: 'Hah, yeah, {!cool-phrase}!' },
-      { speaker: 'Cohost', content: '{@player-nickname-1}, how did you prepare for today\'s massive game?' },
-      { speaker: 'Player', content: 'Definitely. So first I {!preparation-1}?' },
+      { speaker: 'Cohost', content: '{!player-nickname-1}, how did you prepare for today\'s massive game?' },
+      { speaker: 'Player', content: 'So first I {!preparation-1}?' },
       { speaker: 'Host', content: 'No way.' },
-      { speaker: 'Player', content: 'That\'s just the start. I followed it up by {!preparation-2}?' },
+      { speaker: 'Player', content: 'That\'s just the start. I followed it up by {!preparation-2}' },
       { speaker: 'Host', content: 'Wow.' },
       { speaker: 'Cohost', content: 'Incredible. Thanks for your time {!player-nickname-1}' },
       { speaker: 'Player', content: 'Totally. {!player-one-liner}' },
@@ -437,18 +437,10 @@ export const segments: Segment[] = [
           { id: 'player-nickname-origin', description: 'The reason the player is called {!player-nickname-1}.\nContext: "Everyone knows you\'re called {!player-nickname-1} because (your text here)."' }
         ]
       },
-      {
-        id: 'player-one-liner', description: 'A one-liner the player will say'
-      },
-      {
-        id: 'cool-phrase', description: "A cool phrase."
-      },
-      {
-        id: 'preparation-1', description: 'What did the player to do to prepare for the game today?'
-      },
-      {
-        id: 'preparation-2', description: 'What did the player to do to prepare for the game today?'
-      }
+      { id: 'player-one-liner', description: 'A one-liner the player will say' },
+      { id: 'cool-phrase', description: "A cool phrase." },
+      { id: 'preparation-1', description: 'What did the player to do to prepare for the game today?' },
+      { id: 'preparation-2', description: 'What did the player to do to prepare for the game today? We already know he\'ll say "{!preparation-1}"' }
     ]
   },
   {
@@ -472,27 +464,13 @@ export const segments: Segment[] = [
       { speaker: 'Host', content: 'Get a room you two!' },
     ],
     prompts: [
-      {
-        id: 'reaction', description: 'A fan\'s reaction to the event tonight. Context: "How do I like it?! (your text here)"'
-      },
-      {
-        id: 'memorable-event-1', description: "An event that happened during tonight's game"
-      },
-      {
-        id: 'memorable-event-2', description: "An event that happened during tonight's game"
-      },
-      {
-        id: 'time-amount', description: 'An amount of time (e.g. "1 minute", "1 year"'
-      },
-      {
-        id: 'fake-name-1', description: 'An obviously fake player name'
-      },
-      {
-        id: 'fake-name-2', description: 'An obviously fake player name. Previous names: {!fake-name-1}'
-      },
-      {
-        id: 'fake-name-3', description: 'An obviously fake player name. Previous names: {!fake-name-1}, {!fake-name-2}'
-      },
+      { id: 'reaction', description: 'A fan\'s reaction to the event tonight. Context: "How do I like it?! (your text here)"' },
+      { id: 'memorable-event-1', description: "An event that happened during tonight's game" },
+      { id: 'memorable-event-2', description: "An event that happened during tonight's game" },
+      { id: 'time-amount', description: 'An amount of time (e.g. "1 minute", "1 year")' },
+      { id: 'fake-name-1', description: 'An obviously fake player name' },
+      { id: 'fake-name-2', description: 'An obviously fake player name. Previous names: {!fake-name-1}' },
+      { id: 'fake-name-3', description: 'An obviously fake player name. Previous names: {!fake-name-1}, {!fake-name-2}' },
     ]
   },
 
@@ -535,7 +513,7 @@ export const segments: Segment[] = [
     id: 'closing-mother',
     topic: 'any',
     lines: [
-      { speaker: 'Host', content: 'Here to close the story out is {#mother-of}\'s mother! {#mother-of}\'s mother, thank you for joining us on Telimpromptu News.' },
+      { speaker: 'Host', content: 'Here to close the story out with us is {#mother-of}\'s mother! {#mother-of}\'s mother, thank you for joining us on Telimpromptu News.' },
       { speaker: 'mother', content: '{!mother-greeting}' },
       { speaker: 'Cohost', content: 'Haha. {#mother-of}\'s mother, what did you think of tonight\'s story?' },
       { speaker: 'mother', content: 'Well young man, I have to say I especially liked the part when {!mothers-favorite-part}' },

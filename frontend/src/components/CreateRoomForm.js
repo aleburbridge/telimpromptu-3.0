@@ -18,7 +18,7 @@ export default function CreateRoomForm() {
             wordSlug = wordSlug + 's';
         } else if (wordSlug.endsWith('y')) {
             wordSlug = wordSlug.slice(0, -1) + 'ies';
-        } else if (wordSlug.endsWith('ch')) {
+        } else if (wordSlug.endsWith('ch') || wordSlug.endsWith('o')) {
             wordSlug = wordSlug + 'es';
         } else if (wordSlug.endsWith('s')) {
             // do nothing

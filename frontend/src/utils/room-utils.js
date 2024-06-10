@@ -24,7 +24,7 @@ export async function getRoomIdFromRoomName(roomName) {
         const roomDoc = querySnapshot.docs[0];
         return roomDoc.id;
     } else {
-        throw new Error('Room not found');
+        return { success: false, message: `Could not find room with name ${roomName}` };
     }
 }
 
@@ -167,7 +167,6 @@ export async function setScriptSegments(roomId, segments) {
         await updateDoc(docRef, {
             segmentIds: segments
         });
-        console.log(`Value "${segments}" added to map field "segmentIds" in document "${roomId}" successfully.`);
         return { success: true }
     } catch (error) {
         console.error("Error adding value to map field: ", error);
@@ -182,7 +181,6 @@ export async function addPromptResponse(roomId, promptId, promptResponse) {
         await updateDoc(docRef, {
             [`responses.${promptId}`]: promptResponse
         });
-        console.log(`Value "${promptResponse}" added to map field "responses.${promptId}" in document "${roomId}" successfully.`);
         return { success: true }
     } catch (error) {
         console.error("Error adding value to map field: ", error);
