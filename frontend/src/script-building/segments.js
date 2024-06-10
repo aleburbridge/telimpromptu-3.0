@@ -90,7 +90,7 @@ export const segments = [
     lines: [
       { speaker: 'Cohost', content: 'Now we want to hear from you all. Call in to the Telimpromptu News station with your thoughts on tonight\'s story and you may be featured live on the air. Lines are open.' },
       { speaker: 'Host', content: 'And it looks like we\'re getting our first caller. Caller, you\'re on the air. What\'s your name and where are you calling from?' },
-      { speaker: 'mother', content: 'Oh hello, sweeite. I\'m {#mother-of}\'s mother and I\'m calling from {!mother-location}' },
+      { speaker: 'mother', content: 'Oh hello, sweetie. I\'m {#mother-of}\'s mother and I\'m calling from {!mother-location}' },
       { speaker: 'Cohost', content: '{#mother-of}\'s mother, what are your reactions to tonight\'s story?'},
       { speaker: 'mother', content: '{!mother-reaction}'},
       { speaker: 'Host', content: 'Well said, {#mother-of}\'s mother.'},
@@ -262,7 +262,7 @@ export const segments = [
     id: 'crime-4',
     topic: 'crime',
     lines: [
-      { speaker: 'Host', content: 'In an unexpected turn of events, we have an exclusive interview with the criminal {@criminal} who has agreed to speak with us. {@criminal}, why did you commit this crime?' },
+      { speaker: 'Host', content: 'In an unexpected turn of events, we have an exclusive interview with the perpetrator of the crime themself, {@criminal} who has agreed to speak with us. {@criminal}, why did you commit this crime?' },
       { speaker: 'Criminal', content: 'Well, it all started when {!criminal-reason}.' },
       { speaker: 'Cohost', content: 'That is quite a story. What do you have to say to the people watching this?' },
       { speaker: 'Criminal', content: 'To everyone out there, I want to say {!criminal-message}.' },
@@ -435,18 +435,10 @@ export const segments = [
           { id: 'player-nickname-origin', description: 'The reason the player is called {!player-nickname-1}.\nContext: "Everyone knows you\'re called {!player-nickname-1} because (your text here)."' }
         ]
       },
-      {
-        id: 'player-one-liner', description: 'A one-liner the player will say'
-      },
-      {
-        id: 'cool-phrase', description: "A cool phrase."
-      },
-      {
-        id: 'preparation-1', description: 'What did the player to do to prepare for the game today?'
-      },
-      {
-        id: 'preparation-2', description: 'What did the player to do to prepare for the game today?'
-      }
+      { id: 'player-one-liner', description: 'A one-liner the player will say' },
+      { id: 'cool-phrase', description: "A cool phrase." },
+      { id: 'preparation-1', description: 'What did the player to do to prepare for the game today?' },
+      { id: 'preparation-2', description: 'What did the player to do to prepare for the game today?' }
     ]
   },
   {
@@ -470,27 +462,13 @@ export const segments = [
       { speaker: 'Host', content: 'Get a room you two!' },
     ],
     prompts: [
-      {
-        id: 'reaction', description: 'A fan\'s reaction to the event tonight. Context: "How do I like it?! (your text here)"'
-      },
-      {
-        id: 'memorable-event-1', description: "An event that happened during tonight's game"
-      },
-      {
-        id: 'memorable-event-2', description: "An event that happened during tonight's game"
-      },
-      {
-        id: 'time-amount', description: 'An amount of time (e.g. "1 minute", "1 year"'
-      },
-      {
-        id: 'fake-name-1', description: 'An obviously fake player name'
-      },
-      {
-        id: 'fake-name-2', description: 'An obviously fake player name. Previous names: {!fake-name-1}'
-      },
-      {
-        id: 'fake-name-3', description: 'An obviously fake player name. Previous names: {!fake-name-1}, {!fake-name-2}'
-      },
+      { id: 'reaction', description: 'A fan\'s reaction to the event tonight. Context: "How do I like it?! (your text here)"' },
+      { id: 'memorable-event-1', description: "An event that happened during tonight's game" },
+      { id: 'memorable-event-2', description: "An event that happened during tonight's game" },
+      { id: 'time-amount', description: 'An amount of time (e.g. "1 minute", "1 year")' },
+      { id: 'fake-name-1', description: 'An obviously fake player name' },
+      { id: 'fake-name-2', description: 'An obviously fake player name. Previous names: {!fake-name-1}' },
+      { id: 'fake-name-3', description: 'An obviously fake player name. Previous names: {!fake-name-1}, {!fake-name-2}' },
     ]
   },
 
@@ -533,7 +511,7 @@ export const segments = [
     id: 'closing-mother',
     topic: 'any',
     lines: [
-      { speaker: 'Host', content: 'Here to close the story out is {#mother-of}\'s mother! {#mother-of}\'s mother, thank you for joining us on Telimpromptu News.' },
+      { speaker: 'Host', content: 'Here to close the story out with us is {#mother-of}\'s mother! {#mother-of}\'s mother, thank you for joining us on Telimpromptu News.' },
       { speaker: 'mother', content: '{!mother-greeting}' },
       { speaker: 'Cohost', content: 'Haha. {#mother-of}\'s mother, what did you think of tonight\'s story?' },
       { speaker: 'mother', content: 'Well young man, I have to say I especially liked the part when {!mothers-favorite-part}' },

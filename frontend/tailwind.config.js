@@ -5,9 +5,10 @@ module.exports = {
     extend: {
       colors: {
         text: '#ebe9fc',
-        background: '#07071a', 
+        background: 'rgb(7, 7, 25)', 
         primary: '#3a31d8',
-        secondary: '#18154b', 
+        secondary: '#17127f', 
+        accentpink: 'rgb(225, 74, 119)',
         accent: '#eae434',
       },
       animation: {

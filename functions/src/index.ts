@@ -25,8 +25,54 @@ function containsAny(set: Set<string>, array: string[]): boolean {
   return false;
 }
 
-// ----------------- ROOM FUNCTIONS -------------------
+// ----------------- Player FUNCTIONS -------------------
+async function isPlayerNameAvailable(playerName: string, roomId: string): Promise<boolean> {
+  const querySnapshot = await playersCollectionRef
+      .where('playerName', '==', playerName)
+      .where('roomId', '==', roomId)
+      .get();
+  return querySnapshot.empty;
+}
 
+export const savePlayerToDb = functions.https.onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+      try {
+          const { playerName, roomId } = req.body;
+
+          if (!playerName || !roomId) {
+              return res.status(400).send({ success: false, message: 'playerName and roomId are required' });
+          }
+
+          const available = await isPlayerNameAvailable(playerName, roomId);
+          if (available) {
+              const docRef = await playersCollectionRef.add({
+                  playerName: playerName,
+                  roomId: roomId,
+                  isReady: false,
+                  role: null,
+                  topicVote: null,
+                  prompts: [],
+                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                  lastActive: admin.firestore.FieldValue.serverTimestamp(),
+              });
+
+              const roomDocRef = roomsCollectionRef.doc(roomId);
+              await roomDocRef.update({
+                  players: admin.firestore.FieldValue.arrayUnion(docRef.id)
+              });
+
+              return res.status(200).send({ success: true, playerId: docRef.id });
+          } else {
+              return res.status(409).send({ success: false, message: 'Name taken' });
+          }
+      } catch (error) {
+          console.error('Error in player creation process: ', error);
+          return res.status(500).send({ success: false, message: 'Failed to create player due to an error.' });
+      }
+  });
+});
+
+// ----------------- ROOM FUNCTIONS -------------------
 
 const isRoomNameAvailable = async (roomName: string): Promise<boolean> => {
   const q = roomsCollectionRef.where("roomNameLower", "==", roomName.toLowerCase());
@@ -77,7 +123,7 @@ export const saveRoomToDb = functions.https.onRequest((req, res) => {
         headline: null,
         isJoinable: true,
         topic: null,
-        teleprompterSpeed: 1,
+        teleprompterSpeed: 2,
         currentPage: null,
         gamesPlayed: 0,
         createdAt: new Date(),
@@ -167,7 +213,6 @@ export const onTopicVoteSubmitted = functions.firestore
 
   const topicVotedOn = beforeData.topicVote !== afterData.topicVote;
   if (!topicVotedOn) {
-    console.log("Topic has not changed, exiting function");
     return null;
   }
 
@@ -270,7 +315,7 @@ export const onTopicAssigned = functions.firestore
 
   const topicChanged = beforeData.topic !== afterData.topic;
   if (!topicChanged) {
-    console.log("Topic has not changed, exiting function");
+
     return null;
   }
 
@@ -336,13 +381,10 @@ const assignRoles = async (roomId: string) => {
     }
 
     const topic = roomData.topic as Topics;
-    console.log("the topic is ", topic, roomData.topic);
     const specificRoles = topicToRolesMap.get(topic.toLowerCase()) || [];
     const anyRoles = topicToRolesMap.get(Topics.Any.toLowerCase()) || [];
     const rolesSet = new Set([...specificRoles, ...anyRoles]);
-    console.log("umm", specificRoles, rolesSet, topicToRolesMap, topic, topicToRolesMap.has(topic));
     const roles = Array.from(rolesSet);
-    console.log("the eligible roles are ", roles);
 
     // Shuffle roles
     for (let i = roles.length - 1; i > 0; i--) {
@@ -439,7 +481,6 @@ function assignPrompts(
               eligiblePlayerIds.push(playerId);
           }
       }
-      console.log("eligible players? ", eligiblePlayerIds);
 
       if (eligiblePlayerIds.length === 0) {
           throw new Error(`For some reason, couldn't assign prompt ${promptObject.id}`);
@@ -483,27 +524,34 @@ const segmentContainsOnlyTheseRoles = (segment: Segment, roles: string[]) => {
 
 
 function generateListOfSegmentIds(topic: string, maxNumSegments: number, roles: string[]) {
-  console.log("starting generation")
   const out: string[] = [];
 
   const introSegments = segments.filter(s => s.tag === segmentTags.introduction && segmentHasTopic(s, topic) && segmentContainsOnlyTheseRoles(s, roles));
-  console.log("eligible segments: ", introSegments, roles);
   const chosenIntroSegment = getRandomElement(introSegments);
   out.push(chosenIntroSegment.id);
 
-  console.log("picked intro");
-  console.log("picking segments");
   let numPromptsToFulfill = maxNumSegments;
   let availableStorySegments = segments.filter(s => s.tag === segmentTags.segment && segmentHasTopic(s, topic) && segmentContainsOnlyTheseRoles(s, roles));
+  let rolesCurrentlyInSegments: string[] = [];
   while (numPromptsToFulfill > 0 && availableStorySegments.length > 0) {
-      const chosenSegment = getRandomElement(availableStorySegments);
-      out.push(chosenSegment.id);
+    let assignable = true;
 
+    const chosenSegment: Segment = getRandomElement(availableStorySegments);
+    const segmentRoles = chosenSegment.lines.map(l => l.speaker.toLowerCase());
+    for (const role of segmentRoles) {
+        if (rolesCurrentlyInSegments.includes(role.toLowerCase())) {
+          assignable = false;
+        }
+    }
+
+    if (assignable) {
+      out.push(chosenSegment.id);
+      rolesCurrentlyInSegments.push(...segmentRoles)
       availableStorySegments = availableStorySegments.filter(s => s.id !== chosenSegment.id);
       numPromptsToFulfill -= 1;
-  }
+    }
+}
 
-  console.log("picking outro");
   const closingSegments = segments.filter(s => s.tag === segmentTags.closing && segmentHasTopic(s, topic) && segmentContainsOnlyTheseRoles(s, roles));
   const chosenClosingSegment = getRandomElement(closingSegments);
   out.push(chosenClosingSegment.id);
@@ -525,9 +573,7 @@ function aggregateScriptData(segmentIds: string[]): Script {
 
 async function buildScript(roomId: string, topic: string, roles: string[]): Promise<Script> {
   try {
-      console.log("generating segment IDs", roles);
       const scriptSegments = generateListOfSegmentIds(topic, roles.length, roles);
-      console.log(roles.length, scriptSegments.length);
       const setSegmentsResult = await setScriptSegmentsInRoom(roomId, scriptSegments);
       if (!setSegmentsResult.success) {
           throw new Error("Failed to set script segments");

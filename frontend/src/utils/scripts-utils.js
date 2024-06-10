@@ -178,7 +178,6 @@ export function interpolateScriptLineContent(text, gameVariables, players, promp
   outputText = outputText.replace(/{@(.*?)}/g, (match, roleName) => {
     const playersWithName = players.filter(p => p.role === roleName)
     if (playersWithName.length !== 1) {
-      console.log("bad thing happened when interpolating script");
       return match;
     }
     return playersWithName[0].name;

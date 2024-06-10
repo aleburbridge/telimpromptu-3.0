@@ -6,37 +6,57 @@ import { getRoomDataFromRoomId, getRoomIdFromRoomName } from '../utils/room-util
 import { getSegmentData } from '../script-building/BasicScriptBuilder';
 import { replacePlaceholdersInPrompts, replaceSpeakerInPrompts } from '../utils/scripts-utils';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Teleprompter() {
     const [script, setScript] = useState([]);
-    const [speed, setSpeed] = useState(1);
+    const [speed, setSpeed] = useState(2);
     const [paused, setPaused] = useState(false);
     const [roomId, setRoomId] = useState('');
+    const [link, setLink] = useState('')
     const teleprompterRef = useRef(null);
     const scrollInterval = useRef(null);
     const { roomName } = useParams();
 
     useEffect(() => {
         const initializeRoom = async () => {
-            let roomId;
-            if (roomName) {
-                console.log("room name is", roomName)
-                roomId = await getRoomIdFromRoomName(roomName);
-            } else {
-                roomId = await getRoomIdFromPlayerId(localStorage.getItem('playerId'));
-            }
-            setRoomId(roomId);
-            const roomData = await getRoomDataFromRoomId(roomId);
-            const scriptSegments = await fetchScript(roomData.segmentIds, roomId);
-            setScript(scriptSegments);
-
-            const roomDocRef = doc(db, 'rooms', roomId);
-            onSnapshot(roomDocRef, (docSnapshot) => {
-                if (docSnapshot.exists()) {
-                    const roomData = docSnapshot.data();
-                    setSpeed(roomData.teleprompterSpeed || 1);
+            try {
+                let roomId;
+                if (roomName) {
+                    roomId = await getRoomIdFromRoomName(roomName);
+                    const formattedRoomName = roomName.replace(/ /g, '%20');
+                    setLink(`https://telimpromptu.net/teleprompter/${formattedRoomName}`);
+                } else {
+                    const playerId = localStorage.getItem('playerId');
+                    if (playerId) {
+                        roomId = await getRoomIdFromPlayerId(playerId);
+                    }
                 }
-            });
+
+                if (roomId) {
+                    setRoomId(roomId);
+                    const roomData = await getRoomDataFromRoomId(roomId);
+                    if (roomData && roomData.segmentIds) {
+                        const scriptSegments = await fetchScript(roomData.segmentIds, roomId);
+                        setScript(scriptSegments);
+                        let roomName = roomData.roomName;
+                        const formattedRoomName = roomName.replace(/ /g, '%20');
+                        setLink(`https://telimpromptu.net/teleprompter/${formattedRoomName}`);
+                    }
+
+                    const roomDocRef = doc(db, 'rooms', roomId);
+                    onSnapshot(roomDocRef, (docSnapshot) => {
+                        if (docSnapshot.exists()) {
+                            const roomData = docSnapshot.data();
+                            if (roomData && roomData.teleprompterSpeed !== undefined) {
+                                setSpeed(roomData.teleprompterSpeed);
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing room:', error);
+            }
         };
 
         initializeRoom();
@@ -45,8 +65,10 @@ export default function Teleprompter() {
     useEffect(() => {
         if (teleprompterRef.current && !paused) {
             scrollInterval.current = setInterval(() => {
-                teleprompterRef.current.scrollBy(0, speed);
-            }, 50);
+                if (teleprompterRef.current) {
+                    teleprompterRef.current.scrollBy(0, speed);
+                }
+            }, 40);
         } else {
             clearInterval(scrollInterval.current);
         }
@@ -76,7 +98,9 @@ export default function Teleprompter() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
-            <div className="teleprompter-text overflow-hidden h-4/5 w-full max-w-4xl mx-auto p-4 text-2xl leading-loose" ref={teleprompterRef}>
+            <div className="teleprompter-text overflow-hidden h-4/5 w-full max-w-4xl mx-auto p-4 text-4xl leading-loose" ref={teleprompterRef}>
+            <Link to='/'>← Return to home page</Link>
+                <div style={{ height: '100vh' }}></div>
                 {script.map((line, index) => (
                     <div key={index}>
                         <span className="mb-20 text-accent">{line.speaker}</span>
@@ -85,6 +109,11 @@ export default function Teleprompter() {
                         <br />
                     </div>
                 ))}
+                <p className='text-accent text-3xl'>
+                    Thanks for playing! You can access this teleprompter again by going to this link: {link}
+                    <br/>
+                <Link to='/'>← Return to home page</Link>
+            </p>
             </div>
             <div className="controls mt-4 flex gap-4">
                 <button className="hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={() => handleSpeedChange(speed - 1)}>«</button>

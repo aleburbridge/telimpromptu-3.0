@@ -29,12 +29,8 @@ export default function TestPage() {
 
   function generateListOfSegmentIds(topic, maxNumSegments, roles) {
     const out = []
-    console.log("Segements are...")
-    console.log(segments);
-    console.log("intro segements are...")
 
     const introSegments = segments.filter(s => s.tag === segmentTags.introduction && segmentHasTopic(s, topic) && segmentContainsOnlyTheseRoles(s, roles));
-    console.log(introSegments)
     const chosenIntroSegment = getRandomElement(introSegments);
     out.push(chosenIntroSegment.id);
 

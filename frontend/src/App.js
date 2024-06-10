@@ -15,15 +15,13 @@ import TestPage from './pages/TestPage';
 
 function App() {
   const location = useLocation();
-  const isTeleprompterPage = location.pathname === '/teleprompter';
+  const isTeleprompterPage = location.pathname.startsWith('/teleprompter');
 
   return (
     <div className='App flex flex-col min-h-screen'>
       {!isTeleprompterPage && (
         <header>
-          <Link to='/' className='no-underline'>
-            <h1 className='text-4xl font-bold mt-6 mb-4'>Telimpromptu</h1>
-          </Link>
+          <h1 className='text-4xl font-bold mt-6 mb-4'><Link to='/' className='no-underline'>📺</Link> Telimpromptu</h1>
         </header>
       )}
       <main className='flex-grow'>

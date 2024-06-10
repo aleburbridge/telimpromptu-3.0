@@ -29,7 +29,6 @@ export default function PromptAnswering() {
 
     useEffect(() => {
         if (!roomId) return;
-        console.log("refreshing")
 
         const roomDocRef = doc(db, 'rooms', roomId);
         let previousPromptIds = new Set();

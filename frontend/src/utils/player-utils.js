@@ -33,6 +33,7 @@ export async function savePlayerToDb(playerName, roomId) {
         return { success: false, errorMessage: 'Failed to create player due to an error.' };
     }
 }
+
 export async function getPlayerDataFromPlayerId(playerId) {
     try {
         const docRef = doc(playerCollectionRef, playerId);
@@ -75,7 +76,6 @@ export async function setPromptAssignments(playerId, promptIds) {
     try {
         const docRef = playerCollectionRef.doc(playerId);
         await updateDoc(docRef, {prompts: promptIds})
-        console.log(`Field "${promptIds}" added to player "${playerId}" successfully.`);
         return { success: true }
     } catch (error) {
         console.error("Error adding field to document: ", error);
@@ -164,14 +164,9 @@ export async function getAvailablePromptsForPlayer(playerId) {
         const roomData = await getRoomDataFromRoomId(roomId);
         
         const promptIds = playerData.prompts;
-        console.log(roomData.segmentIds);
-        console.log("Prompt IDs assigned to player:", promptIds);
         const allPrompts = segments.filter(s => roomData.segmentIds.includes(s.id)).reduce((acc, segment) => [...acc, ...segment.prompts.map(p => getAllPrompts(p)).flat()], []);
-        console.log(allPrompts);
         // Filter out prompts that have already been responded to
         const answeredPrompts = roomData.responses || {};
-
-        console.log(answeredPrompts, promptIds, allPrompts);
 
         const availablePrompts = allPrompts.filter(prompt => {
             if (!promptIds.includes(prompt.id)) return false;
@@ -182,14 +177,12 @@ export async function getAvailablePromptsForPlayer(playerId) {
             // Check for dependencies in the description ({!... })
             const dependencyMatches = prompt.description.match(/\{!(.*?)\}/g);
             if (!dependencyMatches) return true;
-            console.log(dependencyMatches);
             
             return dependencyMatches.every(dependency => {
                 const dependentPromptId = dependency.replace(/[{}!]/g, '');
                 return answeredPrompts[dependentPromptId];
             });
         });
-        console.log("the available prompts are", availablePrompts)
         return availablePrompts;
     } catch (error) {
         console.error('Error fetching available prompts for player:', error);
