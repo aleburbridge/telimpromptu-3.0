@@ -305,6 +305,33 @@ async function setRoomTopic(roomId: string, topic: string): Promise<void> {
   }
 }
 
+
+export async function randomlyAssignHeadlineWriter(roomId: string) {
+  if (roomId === null || roomId === "") {
+      return { success: false, message: `room does not exist`}
+  }
+
+  const roomData = await getRoomDataFromRoomId(roomId);
+  let players = [];
+  if (roomData && roomData.headlineWriterId && roomData.gamesPlayed < 1) {
+      return;
+  }
+
+  try {
+      if (roomData) {
+        players = roomData.players
+      }
+      const luckyGuy = players[Math.floor(Math.random() * players.length)];
+      const roomDocRef = roomsCollectionRef.doc(roomId);
+      await roomDocRef.update({ headlineWriterId: luckyGuy.id });
+
+      return { success: true, message: `Headline writer assigned as ${luckyGuy.id}`}
+  } catch (error) {
+      console.error('Error in assigning headline writer:', error);
+      return { success: false, message: `Headline writer not assigned`}
+  }
+}
+
 export const onTopicAssigned = functions.firestore
 .document("rooms/{roomId}")
 .onUpdate(async (change, context) => {
@@ -321,9 +348,11 @@ export const onTopicAssigned = functions.firestore
 
 
   try {
+    await randomlyAssignHeadlineWriter(roomId);
     await assignRoles(roomId);
 
     const roomRef = roomsCollectionRef.doc(roomId);
+    await roomRef.update({ isAvailableToJoin: false });
     await roomRef.update({ rolesAssigned: true }); // for navigating from topicvotepage to headlinepage
 
     const roomDoc = await roomsCollectionRef.doc(roomId).get();
@@ -373,6 +402,7 @@ export const onTopicAssigned = functions.firestore
 
   return null;
 });
+
 const assignRoles = async (roomId: string) => {
   try {
     const roomData = await getRoomDataFromRoomId(roomId);

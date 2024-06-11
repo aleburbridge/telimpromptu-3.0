@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { playerCollectionRef, roomsCollectionRef } from '../config/firebase.js';
 import { getRoomIdFromPlayerId, isAllTopicVotesIn } from '../utils/player-utils.js';
-import { tallyVotes } from '../utils/game-utils.js';
 
 export default function TopicVotePage() {
     const [voteSubmitted, setVoteSubmitted] = useState(false);
@@ -28,7 +27,6 @@ export default function TopicVotePage() {
             const allVotesIn = await isAllTopicVotesIn(roomId);
             if (allVotesIn) {
                 setIsSettingUp(true);
-                await tallyVotes(roomId);
 
                 const roomDocRef = doc(roomsCollectionRef, roomId);
                 const unsubscribeRoom = onSnapshot(roomDocRef, (roomDoc) => {

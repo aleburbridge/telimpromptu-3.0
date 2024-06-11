@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import CreateRoomForm from '../components/CreateRoomForm';
 import About from '../components/About';
 import AllRoomsList from '../components/AllRoomsList';
-import TestHeadlineButton from '../testing/TestHeadlineButton';
 
 export default function HomePage() {
     const [showCreateRoomButton, setShowCreateRoomButton] = useState(true);
