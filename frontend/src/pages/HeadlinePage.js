@@ -101,7 +101,7 @@ export default function HeadlinePage() {
 
             {isUserHeadlineWriter && (
                 <>
-                    <p className='mt-2'>You are the headline writer. Write the headline of the big story below.</p>
+                    <p className='mt-2'>You are the headline writer. Write the headline for a {topic} story.</p>
                     <textarea
                         type="text"
                         placeholder=" "

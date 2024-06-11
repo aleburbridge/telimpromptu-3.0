@@ -320,10 +320,11 @@ export async function randomlyAssignHeadlineWriter(roomId: string) {
   try {
       if (roomData) {
         players = roomData.players
+        console.log("players are", players)
       }
       const luckyGuy = players[Math.floor(Math.random() * players.length)];
       const roomDocRef = roomsCollectionRef.doc(roomId);
-      await roomDocRef.update({ headlineWriterId: luckyGuy.id });
+      await roomDocRef.update({ headlineWriterId: luckyGuy });
 
       return { success: true, message: `Headline writer assigned as ${luckyGuy.id}`}
   } catch (error) {
