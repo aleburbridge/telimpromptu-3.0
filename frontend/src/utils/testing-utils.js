@@ -2,10 +2,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { roomsCollectionRef } from '../config/firebase';
 import { saveRoomToDb } from './room-utils';
 import { savePlayerToDb } from './player-utils';
-// import { randomlyAssignHeadlineWriter } from './game-utils';
 import { assignHostToRoom } from './room-utils';
-import { aggregateScriptData, generateListOfSegmentIds } from '../script-building/BasicScriptBuilder';
-import { prefillScriptData } from './game-utils';
 
 export async function setupTestEnvironment() {
     try {

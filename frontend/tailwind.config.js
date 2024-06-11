@@ -5,7 +5,7 @@ module.exports = {
     extend: {
       colors: {
         text: '#ebe9fc',
-        background: 'rgb(7, 7, 25)', 
+        background: 'rgb(2, 2, 24)', 
         primary: '#3a31d8',
         secondary: '#17127f', 
         accentpink: 'rgb(225, 74, 119)',

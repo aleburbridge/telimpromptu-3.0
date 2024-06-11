@@ -21,7 +21,13 @@ function App() {
     <div className='App flex flex-col min-h-screen'>
       {!isTeleprompterPage && (
         <header>
-          <h1 className='text-4xl font-bold mt-6 mb-4'><Link to='/' className='no-underline'>📺</Link> Telimpromptu</h1>
+          <h1 className='text-4xl font-bold mt-6 mb-4 flex items-center justify-center'>
+              <Link to='/' className='no-underline flex items-center'>
+                  <img src='/tv_transparent.png' alt='logo' className='h-10 mr-2' />
+                  Telimpromptu
+              </Link>
+          </h1>
+
         </header>
       )}
       <main className='flex-grow'>

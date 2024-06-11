@@ -3,8 +3,7 @@ import { playerCollectionRef } from '../config/firebase.js';
 import { doc, query, where, onSnapshot, updateDoc } from 'firebase/firestore';
 import { Link, useNavigate } from 'react-router-dom';
 import { getRoomIdFromPlayerId } from '../utils/player-utils.js';
-import { getRoomNameById, setIsRoomJoinable } from '../utils/room-utils.js';
-import { startGameFromWaitingRoom } from '../utils/game-utils.js';
+import { getRoomNameById } from '../utils/room-utils.js';
 
 export default function WaitingRoomPage() {
     const navigate = useNavigate();
@@ -49,11 +48,7 @@ export default function WaitingRoomPage() {
             setReadyToStart(players.length > 2); // why is this a number and not a bool \:(
 
             if (players.length > 2 && allReady) {
-                const result = await startGameFromWaitingRoom(roomId);
-                if (result.success) {
-                    setIsRoomJoinable(roomId, false);
-                    navigate('/topic-vote');
-                }
+                navigate('/topic-vote');
             }
         });
 

@@ -1,20 +1,6 @@
 import axios from 'axios';
 import { query, where, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
-import { roomsCollectionRef, playerCollectionRef, PROJECT_ID, REGION } from '../config/firebase';
-
-// keeping this around for testing
-export async function saveRoomToDb(roomName, password) {
-    try {
-        const response = await axios.post(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/saveRoomToDb`, {
-            roomName,
-            password
-        });
-        return response.data;
-    } catch (error) {
-        console.error(`Could not save room with name ${roomName}`, error);
-        return { success: false, message: 'Error saving room to database' };
-    }
-}
+import { roomsCollectionRef, playerCollectionRef } from '../config/firebase';
 
 export async function getRoomIdFromRoomName(roomName) {
     const roomQuery = query(roomsCollectionRef, where('roomNameLower', '==', roomName));
@@ -116,23 +102,6 @@ export async function setRoomHeadline(roomId, headline) {
 }
 
 //TODO: REPLACE W API CALL
-export async function setRoomTopic(roomId, topic) {
-    const roomDocRef = doc(roomsCollectionRef, roomId);
-    await updateDoc(roomDocRef, {topic: topic});
-}
-
-//TODO: REPLACE W API CALL
-export async function updateRoomProperty(roomId, propertyName, propertyValue) {
-    const roomDocRef = doc(roomsCollectionRef, roomId);
-    try {
-        await updateDoc(roomDocRef, { [propertyName]: propertyValue });
-    } catch (error) {
-        console.error('Error updating document: ', error);
-    }
-}
-
-
-//TODO: REPLACE W API CALL
 export async function getPlayersInRoom(roomId) {
     try {
         const roomPlayersQuery = query(playerCollectionRef, where('roomId', '==', roomId));
@@ -142,48 +111,5 @@ export async function getPlayersInRoom(roomId) {
     } catch (error) {
         console.error(`Error getting players from room ID ${roomId}:`, error);
         return {}
-    }
-}
-
-//TODO: REPLACE W API CALL
-export async function getRolesInRoom(roomId) {
-    let roles = []
-    try {
-        const players = await getPlayersInRoom(roomId)
-        for (const player of players) {
-            roles.push(player.role);
-        }
-        return roles;
-    } catch (error) {
-        console.error(`Error getting players from room ID ${roomId}:`, error);
-        return {}
-    }
-}
-
-//TODO: REPLACE W API CALL
-export async function setScriptSegments(roomId, segments) {
-    try {
-        const docRef = doc(roomsCollectionRef, roomId);
-        await updateDoc(docRef, {
-            segmentIds: segments
-        });
-        return { success: true }
-    } catch (error) {
-        console.error("Error adding value to map field: ", error);
-        return { success: false }
-    }
-}
-
-//TODO: REPLACE W API CALL
-export async function addPromptResponse(roomId, promptId, promptResponse) {
-    try {
-        const docRef = doc(roomsCollectionRef, roomId);
-        await updateDoc(docRef, {
-            [`responses.${promptId}`]: promptResponse
-        });
-        return { success: true }
-    } catch (error) {
-        console.error("Error adding value to map field: ", error);
-        return { success: false }
     }
 }
