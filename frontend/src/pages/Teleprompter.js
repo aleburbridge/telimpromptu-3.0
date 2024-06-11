@@ -99,7 +99,6 @@ export default function Teleprompter() {
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
             <div className="teleprompter-text overflow-hidden h-4/5 w-full max-w-4xl mx-auto p-4 text-4xl leading-loose" ref={teleprompterRef}>
-            <Link to='/'>← Return to home page</Link>
                 <div style={{ height: '100vh' }}></div>
                 {script.map((line, index) => (
                     <div key={index}>
@@ -112,7 +111,8 @@ export default function Teleprompter() {
                 <p className='text-accent text-3xl'>
                     Thanks for playing! You can access this teleprompter again by going to this link: {link}
                     <br/>
-                <Link to='/'>← Return to home page</Link>
+                    <br/>
+                <Link to='/' className='text-primary'>← Return to home page</Link>
             </p>
             </div>
             <div className="controls mt-4 flex gap-4">
