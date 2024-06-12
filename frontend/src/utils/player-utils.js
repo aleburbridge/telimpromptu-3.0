@@ -1,7 +1,8 @@
 import { addDoc, query, where, doc, getDocs, getDocFromServer, updateDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { playerCollectionRef, roomsCollectionRef } from '../config/firebase';
 import { getRoomDataFromRoomId } from './room-utils';
-import { segments } from '../script-building/segments';
+import axios from 'axios';
+import { PROJECT_ID, REGION } from '../config/firebase';
 
 export async function savePlayerToDb(playerName, roomId) {
     try {
@@ -158,6 +159,11 @@ export async function setPlayerPromptAssignments(playerId, promptIds) {
 }
 
 export async function getAvailablePromptsForPlayer(playerId) {
+    const response = await axios.get(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getSegments`);
+    let segments = []
+    if (response.data) {
+        segments = (response.data);
+    }
     try {
         const playerData = await getPlayerDataFromPlayerId(playerId);
         const roomId = await getRoomIdFromPlayerId(playerId);

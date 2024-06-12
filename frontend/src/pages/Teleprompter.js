@@ -3,10 +3,12 @@ import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getRoomIdFromPlayerId } from '../utils/player-utils';
 import { getRoomDataFromRoomId, getRoomIdFromRoomName } from '../utils/room-utils';
-import { getSegmentData } from '../script-building/BasicScriptBuilder';
+import { getSegmentData } from '../utils/scripts-utils';
 import { replacePlaceholdersInPrompts, replaceSpeakerInPrompts } from '../utils/scripts-utils';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { PROJECT_ID, REGION } from '../config/firebase';
 
 export default function Teleprompter() {
     const [script, setScript] = useState([]);
@@ -77,7 +79,13 @@ export default function Teleprompter() {
     }, [speed, paused]);
 
     const fetchScript = async (segmentIds, roomId) => {
-        const segments = await Promise.all(segmentIds.map(id => getSegmentData(id)));
+        const response = await axios.get(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getSegments`);
+        let segments = []
+        if (response.data) {
+            segments = (response.data);
+        }
+        segments = await Promise.all(segmentIds.map(id => getSegmentData(id)));
+        console.log("Segments are ", segments)
         const lines = segments.flatMap(segment => segment.lines);
         const replacedLines = await replacePlaceholdersInPrompts(lines, roomId);
         const replacedSpeakersAndLines = await replaceSpeakerInPrompts(replacedLines, roomId);

@@ -1,4 +1,6 @@
 import { getPlayersInRoom, getRoomDataFromRoomId } from "./room-utils";
+import axios from "axios";
+import { REGION, PROJECT_ID } from "../config/firebase";
 
 // call this every time someone answers a prompt
 // but make sure someone doesnt get served a prompt already served!!!
@@ -235,4 +237,17 @@ export async function replacePlaceholdersInPrompts(prompts, roomId) {
     console.error('Error pre-filling prompts:', error);
     return prompts;
   }
+}
+
+export async function getSegmentData(segmentId) {
+  const response = await axios.get(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getSegments`);
+  let segments = []
+  if (response.data) {
+      segments = (response.data);
+  }
+  const segment = segments.find(s => s.id === segmentId);
+  if (!segment) {
+      throw new Error(`Segment with ID ${segmentId} not found`);
+  }
+  return segment;
 }

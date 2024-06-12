@@ -6,12 +6,12 @@ import WaitingRoomPage from './pages/WaitingRoomPage';
 import HeadlinePage from './pages/HeadlinePage';
 import TopicVotePage from './pages/TopicVotePage';
 import { Route, Routes, Link, useLocation } from 'react-router-dom';
-import { SecretPage } from './components/SecretPage';
-import { ScriptWritingPage } from './pages/ScriptWritingPage';
+import { SecretPage } from './pages/SecretPage';
+// import { ScriptWritingPage } from './pages/ScriptWritingPage';
 import Footer from './components/Footer';
 import PromptAnswering from './pages/PromptAnswering';
 import Teleprompter from './pages/Teleprompter';
-import TestPage from './pages/TestPage';
+import { UnderDevelopment } from './pages/UnderDevelopment';
 
 function App() {
   const location = useLocation();
@@ -38,10 +38,9 @@ function App() {
           <Route path='/headline' element={<HeadlinePage />} />
           <Route path='/topic-vote' element={<TopicVotePage />} />
           <Route path='/secret-page' element={<SecretPage />} />
-          <Route path='/script-writing' element={<ScriptWritingPage />} />
+          <Route path='/script-writing' element={<UnderDevelopment />} />
           <Route path='/prompt-answering' element={<PromptAnswering />} />
           <Route path='/teleprompter' element={<Teleprompter />} />
-          <Route path='/test-page' element={<TestPage/>} />
           <Route path='/teleprompter/:roomName' element={<Teleprompter />} />
         </Routes>
       </main>
