@@ -25,6 +25,18 @@ function containsAny(set: Set<string>, array: string[]): boolean {
   return false;
 }
 
+export const getSegments = functions.https.onRequest((req, res) => {
+    corsHandler(req, res, async () => {
+      try {
+        return res.status(200).send(segments);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ success: false, message: "Error getting segments" });
+      }
+    });
+  });
+  
+
 // ----------------- Player FUNCTIONS -------------------
 async function isPlayerNameAvailable(playerName: string, roomId: string): Promise<boolean> {
   const querySnapshot = await playersCollectionRef
