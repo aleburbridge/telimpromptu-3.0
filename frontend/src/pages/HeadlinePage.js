@@ -4,8 +4,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { isHeadlineWriter, getPlayerDataFromPlayerId } from '../utils/player-utils';
 import { getRoomDataFromRoomId, setRoomHeadline } from '../utils/room-utils';
-import { getRandomIdea } from '../utils/mappings/headline-ideas';
-import { getRandomEmoji } from '../utils/mappings/topic-to-emoji';
+import { getRandomIdea } from '../utils/headline-ideas';
+import { getRandomEmoji } from '../utils/topic-to-emoji';
 import PlayersAndRoles from '../components/PlayersAndRoles';
 
 export default function HeadlinePage() {
