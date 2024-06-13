@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { savePlayerToDb } from '../utils/player-utils.js';
 import { generateSlug } from 'random-word-slugs';
 import { REGION, PROJECT_ID } from '../config/firebase.js';
 
@@ -44,15 +43,21 @@ export default function CreateRoomForm() {
         const payload = Object.fromEntries(formData);
     
         try {
-            const response = await axios.post(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/saveRoomToDb`, {
+            const roomResponse = await axios.post(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/saveRoomToDb`, {
                 roomName: payload.roomName,
                 password: payload.password
             });
     
-            const roomResult = response.data;
+            const roomResult = roomResponse.data;
     
             if (roomResult.success) {
-                const playerResult = await savePlayerToDb(payload.playerName, roomResult.roomId);
+                const playerResponse = await axios.post(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/savePlayerToDb`, {
+                    playerName: payload.playerName,
+                    roomId: roomResult.roomId
+                });
+
+                const playerResult = playerResponse.data
+
                 localStorage.setItem('playerId', playerResult.playerId);
                 navigate('/waiting-room');
             } else {

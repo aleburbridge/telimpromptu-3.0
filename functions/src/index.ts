@@ -258,51 +258,34 @@ export const onTopicVoteSubmitted = functions.firestore
 });
 
 
-async function tallyVotes(roomId: string): Promise<string> {
+async function tallyVotes(roomId: string) {
   try {
-    // CHRIS - create constants for Firebase variables; something like
-    // this lets you reuse the variables elsewhere, and also lets you easily
-    // rename it without updating disconnected references if they were littered constants
-    // class playerCollection {
-    //     static const room = "roomId"
-    // })
-    //
-    // and reference it like playerCollection.roomId
     const roomPlayersQuery = playersCollectionRef.where('roomId', '==', roomId);
     const querySnapshot = await roomPlayersQuery.get();
-    const voteCount: { [key: string]: number } = {};
+    const topicVotes: string[] = [];
 
     querySnapshot.docs.forEach(doc => {
       const player = doc.data() as Player;
-      voteCount[player.topicVote] = (voteCount[player.topicVote] || 0) + 1;
+      topicVotes.push(player.topicVote)
     });
 
-    let maxVotes = 0;
-    let topicsWithMaxVotes: string[] = [];
-    for (const topic in voteCount) {
-      if (voteCount[topic] > maxVotes) {
-        maxVotes = voteCount[topic];
-        topicsWithMaxVotes = [topic];
-      } else if (voteCount[topic] === maxVotes) {
-        topicsWithMaxVotes.push(topic);
-      }
+    for (let i = topicVotes.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
+      [topicVotes[i], topicVotes[randomIndex]] = [topicVotes[randomIndex], topicVotes[i]];
     }
 
-    // CHRIS - should dis be null, and then we don't call setRoomTopic it it's null
-    let topicToAssign = '';
-    // CHRIS - fun fact
-    // You don't need to do this if statement. I think topicToAssign = topicsWithMaxVotes[Math.floor(Math.random() * topicsWithMaxVotes.length)]
-    // would just work.
-    // maybe just check topicsWithMaxVotes.length === 0 if a guarding if statement above
-    if (topicsWithMaxVotes.length > 1) {
-      topicToAssign = topicsWithMaxVotes[Math.floor(Math.random() * topicsWithMaxVotes.length)];
-    } else if (topicsWithMaxVotes.length === 1) {
-      topicToAssign = topicsWithMaxVotes[0];
+    let topicToAssign = 'other';
+
+    if(topicVotes.length === 0) {
+      await setRoomTopic(roomId, topicToAssign);
+      return;
     }
+
+    
+    topicToAssign = topicVotes[Math.floor(Math.random() * topicVotes.length)];
 
     await setRoomTopic(roomId, topicToAssign);
-    // CHRIS - I think these should be constants
-    return 'Votes tallied successfully';
+
   } catch (error) {
     throw new Error('Error tallying topic votes')
   }

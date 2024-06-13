@@ -1,39 +1,9 @@
-import { addDoc, query, where, doc, getDocs, getDocFromServer, updateDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
-import { playerCollectionRef, roomsCollectionRef } from '../config/firebase';
+import { query, where, doc, getDocs, getDocFromServer, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { playerCollectionRef } from '../config/firebase';
 import { getRoomDataFromRoomId } from './room-utils';
 import axios from 'axios';
 import { PROJECT_ID, REGION } from '../config/firebase';
 
-export async function savePlayerToDb(playerName, roomId) {
-    try {
-        const available = await isPlayerNameAvailable(playerName, roomId);
-        if (available) {
-            const docRef = await addDoc(playerCollectionRef, {
-                playerName: playerName,
-                roomId: roomId,
-                isReady: false,
-                role: null,
-                topicVote: null,
-                prompts: [],
-                createdAt: new Date(),
-                lastActive: new Date(),
-            });
-
-            // Update the room document with the new player's ID
-            const roomDocRef = doc(roomsCollectionRef, roomId);
-            await updateDoc(roomDocRef, {
-                players: arrayUnion(docRef.id) // Add the new player's ID to the players list
-            });
-
-            return { success: true, playerId: docRef.id };
-        } else {
-            return { success: false, errorMessage: 'Name taken' };
-        }
-    } catch (error) {
-        console.error('Error in player creation process: ', error);
-        return { success: false, errorMessage: 'Failed to create player due to an error.' };
-    }
-}
 
 export async function getPlayerDataFromPlayerId(playerId) {
     try {
