@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getRoomNameById, isRoomJoinable, isRoomPasswordCorrect, getRoomDataFromRoomId } from '../utils/room-utils.js';
-import { savePlayerToDb, getPlayerDataFromPlayerId } from '../utils/player-utils.js';
+import { getPlayerDataFromPlayerId } from '../utils/player-utils.js';
+import axios from 'axios';
+import { REGION, PROJECT_ID } from '../config/firebase.js';
 
 export default function JoinRoomPage() {
     const location = useLocation();
@@ -58,12 +60,18 @@ export default function JoinRoomPage() {
             return;
         }
         try {
-            const result = await savePlayerToDb(formData.playerName, roomId);
-            if (result.success) {
-                localStorage.setItem('playerId', result.playerId);
+            const playerResponse = await axios.post(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/savePlayerToDb`, {
+                playerName: formData.playerName,
+                roomId: roomId
+            });
+
+            const playerResult = playerResponse.data
+
+            if (playerResult.success) {
+                localStorage.setItem('playerId', playerResult.playerId);
                 navigate('/waiting-room');
             } else {
-                setError(result.errorMessage);
+                setError(playerResult.message);
                 setIsJoining(false);
             }
         } catch (error) {

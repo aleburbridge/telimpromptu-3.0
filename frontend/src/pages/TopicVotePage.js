@@ -76,7 +76,10 @@ export default function TopicVotePage() {
                     <p className='text-xl'>Waiting for other players</p><div className="typing-loader ml-3"></div>
                 </div>
                 ) : (
-                    <p className='text-xl'>Vote on a Story Topic</p>
+                    <>
+                        <p className='text-xl'>Vote on a Story Topic</p>
+                        <p className='text-l'>Each vote increases its topic's chance of being randomly selected</p>
+                    </>
                 )}  
             <div className="flex flex-col space-y-4 sm:w-full md:w-1/2 lg:w-1/3 mx-auto mt-4">
                 {['Sports', 'Politics', 'Crime', 'Other'].map(topic => (
