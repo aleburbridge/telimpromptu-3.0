@@ -14,8 +14,8 @@ module.exports = {
         "secondary-light": "#312e81",
         "secondary-dark": "#0f0c29",
         accentpink: "rgb(225, 74, 119)",
-        accent: "#eab308",
-        "accent-light": "#facc15",
+        accent: "#d4af00",
+        "accent-light": "#f4d100",
       },
       backgroundImage: {
         "gradient-main":
