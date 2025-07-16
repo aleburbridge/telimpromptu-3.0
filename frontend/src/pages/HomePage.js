@@ -16,7 +16,7 @@ export default function HomePage() {
     <div className="max-w-md mx-auto px-4 py-6">
       {showCreateRoomButton && (
         <button
-          className="btn btn-accent btn-tall w-full"
+          className="btn btn-accent btn-tall w-full mb-4"
           onClick={toggleFormVisibility}
         >
           Create Room
