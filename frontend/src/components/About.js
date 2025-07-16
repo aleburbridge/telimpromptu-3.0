@@ -6,7 +6,9 @@ export default function About() {
     <div className="mt-3">
       <div className="bg-secondary p-4 rounded-md overflow-y-auto">
         <h3 className="text-xl font-bold mb-2 flex items-center justify-center relative">
-          <span className="absolute left-1/2 transform -translate-x-6">💡</span>
+          <span className="absolute left-1/2 transform -translate-x-12">
+            💡
+          </span>
           <span>About</span>
         </h3>
         <p>
