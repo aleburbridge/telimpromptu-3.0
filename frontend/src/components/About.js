@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function About() {
   return (
     <div className="mt-3">
-      <div className="bg-secondary p-2.5 rounded-md overflow-y-auto">
+      <div className="bg-secondary p-4 rounded-md overflow-y-auto">
         <h3 className="text-xl font-bold mb-2">💡 About</h3>
         <p>
           Telimpromptu is a free multiplayer game where players create and
