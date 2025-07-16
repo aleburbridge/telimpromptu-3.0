@@ -33,7 +33,7 @@ export default function AllRoomsList() {
 
   return (
     <div className="mt-2">
-      <div className="bg-secondary rounded-md overflow-y-auto max-h-64">
+      <div className="bg-secondary p-4 rounded-md overflow-y-auto max-h-64">
         <h3 className="text-xl font-bold mb-2">
           {roomsList.length} Active {roomsList.length === 1 ? "Room" : "Rooms"}
         </h3>
