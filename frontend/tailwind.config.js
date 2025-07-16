@@ -4,29 +4,72 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        text: '#ebe9fc',
-        background: 'rgb(2, 2, 24)', 
-        primary: '#3a31d8',
-        secondary: '#17127f', 
-        accentpink: 'rgb(225, 74, 119)',
-        accent: '#eae434',
+        text: "#f0f4ff",
+        background: "rgb(2, 2, 24)",
+        "background-light": "rgb(15, 15, 35)",
+        primary: "#4f46e5",
+        "primary-light": "#6366f1",
+        "primary-dark": "#3730a3",
+        secondary: "#1e1b4b",
+        "secondary-light": "#312e81",
+        "secondary-dark": "#0f0c29",
+        accentpink: "rgb(225, 74, 119)",
+        accent: "#22d3ee",
+        "accent-light": "#67e8f9",
+      },
+      backgroundImage: {
+        "gradient-main":
+          "linear-gradient(180deg, rgb(15, 15, 35) 0%, rgb(2, 2, 24) 100%)",
+        "gradient-card":
+          "linear-gradient(135deg, rgba(78, 70, 229, 0.1) 0%, rgba(30, 27, 75, 0.3) 100%)",
       },
       animation: {
-        text: 'text 5s ease infinite',
+        text: "text 5s ease infinite",
+        "bounce-gentle": "bounceGentle 2s ease-in-out infinite",
+        "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+        "slide-up": "slideUp 0.3s ease-out",
+        wiggle: "wiggle 0.5s ease-in-out",
       },
       keyframes: {
         text: {
-          '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center',
+          "0%, 100%": {
+            "background-size": "200% 200%",
+            "background-position": "left center",
           },
-          '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center',
+          "50%": {
+            "background-size": "200% 200%",
+            "background-position": "right center",
           },
         },
+        bounceGentle: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-4px)" },
+        },
+        pulseGlow: {
+          "0%, 100%": {
+            boxShadow: "0 0 10px rgba(78, 70, 229, 0.3)",
+            transform: "scale(1)",
+          },
+          "50%": {
+            boxShadow: "0 0 20px rgba(78, 70, 229, 0.6)",
+            transform: "scale(1.02)",
+          },
+        },
+        slideUp: {
+          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "100%": { transform: "translateY(0px)", opacity: "1" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "25%": { transform: "rotate(-3deg)" },
+          "75%": { transform: "rotate(3deg)" },
+        },
+      },
+      boxShadow: {
+        glow: "0 0 20px rgba(78, 70, 229, 0.3)",
+        "glow-lg": "0 0 30px rgba(78, 70, 229, 0.4)",
       },
     },
   },
   plugins: [],
-}
+};
