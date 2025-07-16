@@ -24,7 +24,11 @@ function App() {
           <h1 className="text-4xl font-bold flex items-center justify-center">
             <Link to="/" className="no-underline flex items-center text-text">
               <img src="/tv_transparent.png" alt="logo" className="h-10 mr-2" />
-              <span className="my-auto">Telimpromptu</span>
+              <span className="my-auto">
+                <p>
+                  <em>Telimpromptu</em>
+                </p>
+              </span>
             </Link>
           </h1>
         </header>
