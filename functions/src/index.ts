@@ -64,12 +64,10 @@ export const savePlayerToDb = functions.https.onRequest((req, res) => {
       const { playerName, roomId } = req.body;
 
       if (!playerName || !roomId) {
-        return res
-          .status(400)
-          .send({
-            success: false,
-            message: "playerName and roomId are required",
-          });
+        return res.status(400).send({
+          success: false,
+          message: "playerName and roomId are required",
+        });
       }
 
       const available = await isPlayerNameAvailable(playerName, roomId);
@@ -96,12 +94,10 @@ export const savePlayerToDb = functions.https.onRequest((req, res) => {
       }
     } catch (error) {
       console.error("Error in player creation process: ", error);
-      return res
-        .status(500)
-        .send({
-          success: false,
-          message: "Failed to create player due to an error.",
-        });
+      return res.status(500).send({
+        success: false,
+        message: "Failed to create player due to an error.",
+      });
     }
   });
 });
@@ -141,12 +137,10 @@ export const saveRoomToDb = functions.https.onRequest((req, res) => {
       const { roomName, password } = req.body;
 
       if (!roomName || !password) {
-        return res
-          .status(400)
-          .send({
-            success: false,
-            message: "roomName and password are required",
-          });
+        return res.status(400).send({
+          success: false,
+          message: "roomName and password are required",
+        });
       }
 
       const available = await isRoomNameAvailable(roomName);
@@ -600,7 +594,36 @@ function assignPrompts(
     playerToAssignedPrompts.set(player.id, []);
   }
 
-  for (const promptObject of promptObjects) {
+  // Get the order of prompts as they appear in the script
+  const promptOrderInScript: string[] = [];
+  for (const line of scriptLines) {
+    const promptIds = getReferencedPrompts(line.content);
+    for (const promptId of promptIds) {
+      if (!promptOrderInScript.includes(promptId)) {
+        promptOrderInScript.push(promptId);
+      }
+    }
+  }
+
+  // Sort promptObjects to match the order they appear in the script
+  const sortedPromptObjects = promptObjects.sort((a, b) => {
+    const aPrompts = getPrompts(a);
+    const bPrompts = getPrompts(b);
+    const aFirstPromptId = aPrompts[0]?.id || "";
+    const bFirstPromptId = bPrompts[0]?.id || "";
+
+    const aIndex = promptOrderInScript.indexOf(aFirstPromptId);
+    const bIndex = promptOrderInScript.indexOf(bFirstPromptId);
+
+    // If not found in script order, put at end
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+
+    return aIndex - bIndex;
+  });
+
+  for (const promptObject of sortedPromptObjects) {
     const prompts = getPrompts(promptObject);
 
     let curMinPrompts = Infinity;
