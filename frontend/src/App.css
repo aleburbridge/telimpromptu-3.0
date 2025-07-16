@@ -11,11 +11,10 @@
 
 @layer components {
   .btn {
-    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform;
-    @apply hover:scale-105 active:scale-95;
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300;
     @apply shadow-md hover:shadow-glow;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed transform-none shadow-none;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed shadow-none;
     }
   }
 
@@ -40,10 +39,10 @@
 
   .btn-accent {
     @apply bg-accent text-background;
-    @apply hover:bg-accent-light hover:animate-bounce-gentle;
-    @apply active:animate-wiggle;
+    @apply hover:bg-accent-light hover:shadow-glow-lg hover:animate-pulse-glow;
+    @apply active:shadow-glow-lg;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed animate-none;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed shadow-none;
     }
   }
 
