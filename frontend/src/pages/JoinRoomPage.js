@@ -102,7 +102,7 @@ export default function JoinRoomPage() {
     </div>
   ) : (
     <form
-      className="container-inner mx-auto mt-6 text-black"
+      className="container-inner max-w-md mx-auto mt-6 text-black"
       onSubmit={handleSubmit}
     >
       <h3 className="mt-1 text-white">Joining {roomName}</h3>
