@@ -107,7 +107,7 @@ export default function CreateRoomForm() {
           className="absolute top-4 right-4 text-xl text-white"
           title="Regenerate Room Name"
         >
-          ↺
+          🎲
         </button>
       </div>
       <div>
