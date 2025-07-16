@@ -20,11 +20,11 @@ function App() {
   return (
     <div className="App flex flex-col min-h-screen">
       {!isTeleprompterPage && (
-        <header className="w-full bg-primary py-6 mb-4">
+        <header className="w-full bg-primary py-4 mb-4">
           <h1 className="text-4xl font-bold flex items-center justify-center">
             <Link to="/" className="no-underline flex items-center text-text">
               <img src="/tv_transparent.png" alt="logo" className="h-10 mr-2" />
-              Telimpromptu
+              <span className="my-auto">Telimpromptu</span>
             </Link>
           </h1>
         </header>
