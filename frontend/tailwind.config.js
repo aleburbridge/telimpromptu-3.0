@@ -7,15 +7,15 @@ module.exports = {
         text: "#f0f4ff",
         background: "rgb(2, 2, 24)",
         "background-light": "rgb(15, 15, 35)",
-        primary: "#4f46e5",
+        primary: "#443cbd",
         "primary-light": "#6366f1",
         "primary-dark": "#3730a3",
         secondary: "#1e1b4b",
         "secondary-light": "#312e81",
         "secondary-dark": "#0f0c29",
         accentpink: "rgb(225, 74, 119)",
-        accent: "#fbbf24",
-        "accent-light": "#fcd34d",
+        accent: "#eab308",
+        "accent-light": "#facc15",
       },
       backgroundImage: {
         "gradient-main":
