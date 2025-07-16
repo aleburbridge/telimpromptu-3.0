@@ -20,8 +20,8 @@ function App() {
   return (
     <div className="App flex flex-col min-h-screen">
       {!isTeleprompterPage && (
-        <header className="w-full bg-primary py-4 mb-4 flex flex-col">
-          <h1 className="text-4xl font-bold flex items-center justify-center">
+        <header className="w-full bg-primary py-2 mb-4 flex flex-col">
+          <h1 className="text-2xl font-bold flex items-center justify-center">
             <Link to="/" className="no-underline flex items-center text-text">
               <span className="my-auto">
                 <p>
