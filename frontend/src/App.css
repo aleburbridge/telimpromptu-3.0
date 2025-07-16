@@ -4,36 +4,46 @@
 
 @layer base {
   body {
-    @apply bg-background text-text text-center;
+    @apply bg-gradient-main text-text text-center min-h-screen;
+    background-attachment: fixed;
   }
 }
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-semibold transition duration-300;
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform;
+    @apply hover:scale-105 active:scale-95;
+    @apply shadow-md hover:shadow-glow;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed transform-none shadow-none;
     }
   }
 
   .btn-primary {
-    @apply bg-primary text-text hover:bg-opacity-80;
+    @apply bg-primary text-text;
+    @apply hover:bg-primary-light hover:shadow-glow-lg;
+    @apply active:bg-primary-dark;
     &:disabled {
       @apply bg-gray-500 text-gray-200 cursor-not-allowed;
     }
   }
 
   .btn-secondary {
-    @apply bg-secondary text-text hover:bg-opacity-80;
+    @apply bg-secondary text-text;
+    @apply hover:bg-secondary-light hover:shadow-lg;
+    @apply active:bg-secondary-dark;
+    @apply border border-secondary-light;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed border-gray-500;
     }
   }
 
   .btn-accent {
-    @apply bg-accent text-background hover:bg-opacity-80;
+    @apply bg-accent text-background;
+    @apply hover:bg-accent-light hover:animate-bounce-gentle;
+    @apply active:animate-wiggle;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed animate-none;
     }
   }
 
@@ -42,7 +52,9 @@
   }
 
   .container {
-    @apply mx-auto px-4 py-6 bg-secondary text-text text-center rounded-lg;
+    @apply mx-auto px-6 py-8 bg-gradient-card text-text text-center rounded-2xl;
+    @apply backdrop-blur-sm border border-secondary-light/20;
+    @apply shadow-xl animate-slide-up;
   }
 
   .container-sm {
@@ -62,7 +74,10 @@
   }
 
   .input {
-    @apply px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-black;
+    @apply px-4 py-3 rounded-xl border border-secondary-light/30 focus:outline-none;
+    @apply focus:ring-2 focus:ring-primary focus:border-primary;
+    @apply text-white bg-gray-800 backdrop-blur-sm;
+    @apply transition-all duration-300;
   }
 }
 
@@ -75,21 +90,21 @@
   color: currentColor;
   display: inline-block;
   position: relative;
-  width: 30px; 
-  height: 30px; 
+  width: 30px;
+  height: 30px;
 }
 .lds-spinner div {
-  transform-origin: 15px 15px; 
+  transform-origin: 15px 15px;
   animation: lds-spinner 1.2s linear infinite;
 }
 .lds-spinner div:after {
   content: " ";
   display: block;
   position: absolute;
-  top: 2.4px; 
-  left: 13.8px; 
+  top: 2.4px;
+  left: 13.8px;
   width: 2.4px;
-  height: 6.6px; 
+  height: 6.6px;
   border-radius: 20%;
   background: currentColor;
 }
@@ -115,7 +130,7 @@
 }
 .lds-spinner div:nth-child(6) {
   transform: rotate(150deg);
-  animation-delay: -0.6s;
+  animation-delay: -0.8s;
 }
 .lds-spinner div:nth-child(7) {
   transform: rotate(180deg);
@@ -155,30 +170,62 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px; 
+  gap: 10px;
 }
 
 .typing-loader {
-  width: 6px; 
-  height: 6px; 
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: #fff;
-  box-shadow: 12px 0 #fff, -12px 0 #fff;  
+  box-shadow:
+    12px 0 #fff,
+    -12px 0 #fff;
   position: relative;
   animation: flash 0.5s ease-out infinite alternate;
 }
 
 @keyframes flash {
   0% {
-    background-color: #FFF2;
-    box-shadow: 12px 0 #FFF2, -12px 0 #FFF; 
+    background-color: #fff2;
+    box-shadow:
+      12px 0 #fff2,
+      -12px 0 #fff;
   }
   50% {
-    background-color: #FFF;
-    box-shadow: 12px 0 #FFF2, -12px 0 #FFF2;  
+    background-color: #fff;
+    box-shadow:
+      12px 0 #fff2,
+      -12px 0 #fff2;
   }
   100% {
-    background-color: #FFF2;
-    box-shadow: 12px 0 #FFF, -12px 0 #FFF2;  
+    background-color: #fff2;
+    box-shadow:
+      12px 0 #fff,
+      -12px 0 #fff2;
   }
+}
+
+/* Enhanced hover effects for interactive elements */
+.interactive-card {
+  @apply transition-all duration-300 hover:scale-105;
+  @apply hover:shadow-glow-lg cursor-pointer;
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(78, 70, 229, 0.5);
+}
+
+/* Smooth page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
