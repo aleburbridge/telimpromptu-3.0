@@ -261,15 +261,55 @@ enum Topics {
 }
 
 const topicToRolesMap = new Map<string, string[]>([
-  [Topics.Any.toLowerCase(), ["fieldreporter", "guestexpert", "mother"]],
-  [Topics.Sports.toLowerCase(), ["player", "coach", "fan", "analyst"]],
+  [
+    Topics.Any.toLowerCase(),
+    [
+      "fieldreporter",
+      "guestexpert",
+      "mother",
+      "witness",
+      "viewer",
+      "bystander",
+      "expert",
+    ],
+  ],
+  [
+    Topics.Sports.toLowerCase(),
+    [
+      "player",
+      "coach",
+      "fan",
+      "analyst",
+      "referee",
+      "commentator",
+      "sportscaster",
+      "athlete",
+    ],
+  ],
   [
     Topics.Politics.toLowerCase(),
-    ["politician", "politicalcorrespondent", "campaignstrategist"],
+    [
+      "politician",
+      "politicalcorrespondent",
+      "campaignstrategist",
+      "voter",
+      "pundit",
+      "advisor",
+      "lobbyist",
+    ],
   ],
   [
     Topics.Crime.toLowerCase(),
-    ["criminal", "detective", "witness", "criminologist", "guestexpert"],
+    [
+      "criminal",
+      "detective",
+      "witness",
+      "criminologist",
+      "guestexpert",
+      "prosecutor",
+      "defense",
+      "victim",
+    ],
   ],
 ]);
 
