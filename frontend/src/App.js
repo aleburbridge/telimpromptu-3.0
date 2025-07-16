@@ -25,7 +25,9 @@ function App() {
             <Link to="/" className="no-underline flex items-center text-text">
               <span className="my-auto">
                 <p>
-                  <div>Telimpromptu</div>
+                  <p>
+                    <em>Telimpromptu</em>
+                  </p>
                 </p>
               </span>
             </Link>
