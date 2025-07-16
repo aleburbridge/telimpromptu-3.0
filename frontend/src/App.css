@@ -23,9 +23,8 @@
     @apply bg-primary text-text;
     @apply hover:bg-primary-light hover:shadow-glow-lg;
     @apply active:bg-primary-dark;
-    @apply animate-pulse-glow;
     &:disabled {
-      @apply bg-gray-500 text-gray-200 cursor-not-allowed animate-none;
+      @apply bg-gray-500 text-gray-200 cursor-not-allowed;
     }
   }
 
