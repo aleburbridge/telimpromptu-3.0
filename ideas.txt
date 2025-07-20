@@ -13,13 +13,17 @@ HomePage -> CreateRoomForm or JoinRoom -> WaitingRoom (assign headline writer)->
 TopicVote -> Headline (dole out roles, dole out propmts) -> PromptFilling -> Teleprompter
 
 TODO: 
+
+
 ->Voting system
     after a teleprompter is displayed, players should be able to upvote or downvote each segment. Maybe highly upvoted segments are most likely to appear for other players
 
-->Prompt shenanigans
+->Prompt
+    Have hitting "Enter" submit the prmopt
     Create a universal function that prefills any relevant script data, instead of having separate functions. this will be used for prompt serving and displaying the teleprompter
 
-->api shenanigans
+
+->api
     replace all utils with cloud function calls
     remove utils files
     create restrictions for api calls:  https://firebase.google.com/docs/projects/api-keys#apply-restrictions
