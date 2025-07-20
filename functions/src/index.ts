@@ -317,8 +317,11 @@ const topicToRolesMap = new Map<string, string[]>([
 export const onTopicVoteSubmitted = functions.firestore
   .document("players/{playerId}")
   .onUpdate(async (change, context) => {
+    const playerId = context.params.playerId;
     const beforeData = change.before.data();
     const afterData = change.after.data();
+
+    console.log('🔍 [onTopicVoteSubmitted] Player', playerId, 'vote changed from', beforeData.topicVote, 'to', afterData.topicVote);
 
     const topicVotedOn = beforeData.topicVote !== afterData.topicVote;
     if (!topicVotedOn) {
@@ -329,6 +332,7 @@ export const onTopicVoteSubmitted = functions.firestore
     if (isNewData) {
       try {
         const roomId = afterData.roomId;
+        console.log('🔍 [onTopicVoteSubmitted] Checking votes for roomId:', roomId);
         const roomDoc = await roomsCollectionRef.doc(roomId).get();
         if (!roomDoc.exists) {
           throw new Error(`Room with ID ${roomId} does not exist`);
@@ -336,19 +340,29 @@ export const onTopicVoteSubmitted = functions.firestore
 
         const roomData = roomDoc.data();
         if (roomData) {
-          const players = roomData.players || [];
+          const playerIds = roomData.players || [];
+          console.log('🔍 [onTopicVoteSubmitted] PlayerIds in room:', playerIds);
+          
+          // Get actual player data to check topic votes
+          const playerDocsQuery = playersCollectionRef.where("roomId", "==", roomId);
+          const playerSnapshot = await playerDocsQuery.get();
+          const players = playerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as (Player & { id: string })[];
+          console.log('🔍 [onTopicVoteSubmitted] All players and their votes:', players.map(p => ({ id: p.id, name: p.playerName, vote: p.topicVote })));
+          
           const isAllVotesIn = players.every(
             (player: any) => player.topicVote !== null,
           );
+          console.log('🔍 [onTopicVoteSubmitted] All votes in?', isAllVotesIn);
 
           if (!isAllVotesIn) {
             return null;
           }
 
+          console.log('🔍 [onTopicVoteSubmitted] Tallying votes');
           await tallyVotes(roomId);
         }
       } catch (error) {
-        console.error("Error checking if all votes are in:", error);
+        console.error("🔍 [onTopicVoteSubmitted] Error checking if all votes are in:", error);
         throw error;
       }
     }
@@ -358,14 +372,18 @@ export const onTopicVoteSubmitted = functions.firestore
 
 async function tallyVotes(roomId: string) {
   try {
+    console.log('🔍 [tallyVotes] Starting vote tally for roomId:', roomId);
     const roomPlayersQuery = playersCollectionRef.where("roomId", "==", roomId);
     const querySnapshot = await roomPlayersQuery.get();
     const topicVotes: string[] = [];
 
     querySnapshot.docs.forEach((doc) => {
       const player = doc.data() as Player;
+      console.log('���� [tallyVotes] Player', player.playerName, 'voted for:', player.topicVote);
       topicVotes.push(player.topicVote);
     });
+
+    console.log('🔍 [tallyVotes] All votes:', topicVotes);
 
     for (let i = topicVotes.length - 1; i > 0; i--) {
       const randomIndex = Math.floor(Math.random() * (i + 1));
@@ -378,24 +396,29 @@ async function tallyVotes(roomId: string) {
     let topicToAssign = "other";
 
     if (topicVotes.length === 0) {
+      console.log('🔍 [tallyVotes] No votes found, assigning default topic:', topicToAssign);
       await setRoomTopic(roomId, topicToAssign);
       return;
     }
 
     topicToAssign = topicVotes[Math.floor(Math.random() * topicVotes.length)];
+    console.log('🔍 [tallyVotes] Selected topic:', topicToAssign);
 
     await setRoomTopic(roomId, topicToAssign);
   } catch (error) {
+    console.error('🔍 [tallyVotes] Error:', error);
     throw new Error("Error tallying topic votes");
   }
 }
 
 async function setRoomTopic(roomId: string, topic: string): Promise<void> {
   try {
+    console.log('🔍 [setRoomTopic] Setting topic', topic, 'for roomId:', roomId);
     const roomDocRef = roomsCollectionRef.doc(roomId);
     await roomDocRef.update({ topic: topic });
+    console.log('🔍 [setRoomTopic] Successfully set topic:', topic);
   } catch (error) {
-    console.error("Error setting room topic:", error);
+    console.error("🔍 [setRoomTopic] Error setting room topic:", error);
   }
 }
 
@@ -433,17 +456,22 @@ export const onTopicAssigned = functions.firestore
   .document("rooms/{roomId}")
   .onUpdate(async (change, context) => {
     const roomId = context.params.roomId;
+    console.log('🔍 [onTopicAssigned] Triggered for roomId:', roomId);
 
     const beforeData = change.before.data();
     const afterData = change.after.data();
 
     const topicChanged = beforeData.topic !== afterData.topic;
+    console.log('🔍 [onTopicAssigned] Topic changed?', topicChanged, 'from', beforeData.topic, 'to', afterData.topic);
     if (!topicChanged) {
       return null;
     }
 
     try {
+      console.log('🔍 [onTopicAssigned] Assigning headline writer');
       await randomlyAssignHeadlineWriter(roomId);
+      
+      console.log('🔍 [onTopicAssigned] Assigning roles');
       await assignRoles(roomId);
 
       const roomRef = roomsCollectionRef.doc(roomId);
@@ -465,7 +493,9 @@ export const onTopicAssigned = functions.firestore
         throw new Error(`Topic missing from room data for room ID ${roomId}`);
       }
 
+      console.log('🔍 [onTopicAssigned] Getting roles for topic:', topic);
       const roles = await getRolesInRoom(roomId);
+      console.log('🔍 [onTopicAssigned] Roles:', roles);
       if (!roles || roles.length === 0) {
         throw new Error(`Roles are missing or empty for room ID ${roomId}`);
       }
@@ -475,8 +505,11 @@ export const onTopicAssigned = functions.firestore
         );
       }
 
+      console.log('🔍 [onTopicAssigned] Building script');
       const script = await buildScript(roomId, topic, roles);
+      console.log('🔍 [onTopicAssigned] Script built with', script.lines.length, 'lines and', script.prompts.length, 'prompts');
 
+      console.log('🔍 [onTopicAssigned] Getting players');
       const response = await axios.get(
         `https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getPlayersInRoom`,
         {
@@ -489,22 +522,28 @@ export const onTopicAssigned = functions.firestore
       }
 
       const players: Player[] = response.data;
+      console.log('🔍 [onTopicAssigned] Got players:', players.length);
 
+      console.log('🔍 [onTopicAssigned] Assigning prompts');
       const assignedPrompts = assignPrompts(
         script.lines,
         script.prompts,
         players,
       );
+      console.log('🔍 [onTopicAssigned] Prompts assigned to', assignedPrompts.size, 'players');
+      
       for (const [player, assignment] of assignedPrompts.entries()) {
         const playerDocRef = playersCollectionRef.doc(player);
         const promptIds = assignment
           .map((a) => getPrompts(a))
           .flat()
           .map((p) => p.id);
+        console.log('🔍 [onTopicAssigned] Updating player', player, 'with', promptIds.length, 'prompts');
         await playerDocRef.update({ prompts: promptIds });
       }
+      console.log('🔍 [onTopicAssigned] Successfully completed prompt assignment');
     } catch (error) {
-      console.error("Error in API calls: ", error);
+      console.error("🔍 [onTopicAssigned] Error in API calls: ", error);
     }
 
     return null;
@@ -536,18 +575,30 @@ const assignRoles = async (roomId: string) => {
       ...doc.data(),
     })) as Player[];
 
+    console.log('🔍 [assignRoles] Assigning roles to', players.length, 'players');
+    console.log('🔍 [assignRoles] Available roles:', roles);
+
     let motherPlayer: Player | null = null;
     let randomPlayerName = "";
 
-    for (const [index, player] of players.entries()) {
+        for (const [index, player] of players.entries()) {
       let role = "";
       if (index === 0) {
         role = "host";
       } else if (index === 1) {
         role = "cohost";
       } else {
-        role = roles[index - 2] || "viewer";
+        // Ensure we cycle through available roles instead of falling back to "viewer"
+        if (roles.length > 0) {
+          const roleIndex = (index - 2) % roles.length;
+          role = roles[roleIndex];
+        } else {
+          // Emergency fallback if no roles available
+          role = "guestexpert";
+        }
       }
+
+      console.log('🔍 [assignRoles] Assigning role', role, 'to player', player.playerName, 'at index', index);
 
       const playerDocRef = playersCollectionRef.doc(player.id);
       const lastName = getRandomLastName(role);
@@ -556,8 +607,16 @@ const assignRoles = async (roomId: string) => {
         motherPlayer = player;
       }
 
-      await playerDocRef.update({ role: role, lastName: lastName });
+      try {
+        await playerDocRef.update({ role: role, lastName: lastName });
+        console.log('🔍 [assignRoles] Successfully updated player', player.playerName, 'with role:', role, 'lastName:', lastName);
+      } catch (updateError) {
+        console.error('🔍 [assignRoles] Failed to update player', player.playerName, 'with role:', role, 'Error:', updateError);
+        throw updateError; // Re-throw to be caught by outer catch
+      }
     }
+
+    console.log('🔍 [assignRoles] Successfully assigned roles to all players');
 
     if (motherPlayer) {
       const otherPlayers = players.filter(
@@ -584,7 +643,8 @@ const getRandomLastName = (role: string) => {
     const lastNames = roleEntry.lastNames;
     return lastNames[Math.floor(Math.random() * lastNames.length)];
   }
-  return "";
+  console.warn(`🔍 [getRandomLastName] No last names found for role: ${role}, using fallback`);
+  return "Unknown"; // Fallback last name instead of empty string
 };
 
 function assignPrompts(
@@ -602,6 +662,7 @@ function assignPrompts(
 
   for (const promptObject of promptObjects) {
     const prompts = getPrompts(promptObject);
+    console.log('🔍 [assignPrompts] Processing prompt object:', promptObject.id || promptObject.groupId);
 
     let curMinPrompts = Infinity;
     let eligiblePlayerIds: string[] = [];
@@ -614,6 +675,7 @@ function assignPrompts(
         speakerToReferencedVariables[playerRole] &&
         containsAny(speakerToReferencedVariables[playerRole], promptIds);
       const isPlayerEligibleForPrompt = !playerSpeaksPromptValue;
+      console.log('🔍 [assignPrompts] Player', player.playerName, '(', playerRole, ') eligible for prompt?', isPlayerEligibleForPrompt, 'speaks prompt?', playerSpeaksPromptValue);
       if (!isPlayerEligibleForPrompt) {
         continue;
       }
@@ -629,13 +691,14 @@ function assignPrompts(
       }
     }
 
+    console.log('🔍 [assignPrompts] Eligible players for prompt:', eligiblePlayerIds);
     if (eligiblePlayerIds.length === 0) {
-      throw new Error(
-        `For some reason, couldn't assign prompt ${promptObject.id}`,
-      );
+      console.warn(`No eligible players for prompt ${promptObject.id}, assigning to random player`);
+      eligiblePlayerIds = players.map(p => p.id);
     }
 
     const playerIdToAssign = getRandomElement(eligiblePlayerIds);
+    console.log('🔍 [assignPrompts] Assigned prompt to player:', playerIdToAssign);
     const assignedPrompts = playerToAssignedPrompts.get(playerIdToAssign)!;
 
     if (promptObject.groupId) {
@@ -679,8 +742,10 @@ function generateListOfSegmentIds(
   maxNumSegments: number,
   roles: string[],
 ) {
+  console.log('🔍 [generateListOfSegmentIds] Building script for topic:', topic, 'with roles:', roles);
   const out: string[] = [];
 
+  // Add introduction segment
   const introSegments = segments.filter(
     (s) =>
       s.tag === segmentTags.introduction &&
@@ -690,17 +755,58 @@ function generateListOfSegmentIds(
   const chosenIntroSegment = getRandomElement(introSegments);
   out.push(chosenIntroSegment.id);
 
-  let numPromptsToFulfill = maxNumSegments;
+  // Get all available story segments
   let availableStorySegments = segments.filter(
     (s) =>
       s.tag === segmentTags.segment &&
       segmentHasTopic(s, topic) &&
       segmentContainsOnlyTheseRoles(s, roles),
   );
+
+  console.log('🔍 [generateListOfSegmentIds] Available story segments:', availableStorySegments.length);
+
+  // Track which roles have been covered and which segments have been used
+  const rolesCovered = new Set(['host', 'cohost']); // Host and cohost always have lines
   const usedSegmentIds: string[] = [];
 
-  while (numPromptsToFulfill > 0 && availableStorySegments.length > 0) {
-    // Filter out already used segments
+  // Get roles that need segments (excluding host/cohost)
+  const rolesNeedingSegments = roles.filter(role =>
+    !['host', 'cohost'].includes(role.toLowerCase())
+  );
+
+  console.log('🔍 [generateListOfSegmentIds] Roles needing segments:', rolesNeedingSegments);
+
+  // First pass: Ensure every role gets at least one segment
+  for (const role of rolesNeedingSegments) {
+    if (rolesCovered.has(role)) continue;
+
+    // Find segments that include this role
+    const segmentsForRole = availableStorySegments.filter(segment => {
+      const segmentRoles = segment.lines.map(l => l.speaker.toLowerCase());
+      return segmentRoles.includes(role.toLowerCase()) && !usedSegmentIds.includes(segment.id);
+    });
+
+    console.log('🔍 [generateListOfSegmentIds] Segments available for role', role + ':', segmentsForRole.length);
+
+    if (segmentsForRole.length > 0) {
+      const chosenSegment = getRandomElement(segmentsForRole);
+      out.push(chosenSegment.id);
+      usedSegmentIds.push(chosenSegment.id);
+
+            // Mark all roles in this segment as covered
+      const segmentRoles = chosenSegment.lines.map((l: any) => l.speaker.toLowerCase());
+      segmentRoles.forEach((segmentRole: string) => rolesCovered.add(segmentRole));
+
+      console.log('🔍 [generateListOfSegmentIds] Added segment', chosenSegment.id, 'for role', role);
+    } else {
+      console.warn('🔍 [generateListOfSegmentIds] No segments found for role:', role);
+    }
+  }
+
+  // Second pass: Fill remaining slots with random segments
+  let remainingSlots = Math.max(0, maxNumSegments - out.length + 1); // +1 because we'll subtract intro later
+
+  while (remainingSlots > 0 && availableStorySegments.length > 0) {
     const unusedSegments = availableStorySegments.filter(
       (s) => !usedSegmentIds.includes(s.id),
     );
@@ -710,12 +816,13 @@ function generateListOfSegmentIds(
       break;
     }
 
-    const chosenSegment: Segment = getRandomElement(unusedSegments);
+    const chosenSegment = getRandomElement(unusedSegments);
     out.push(chosenSegment.id);
     usedSegmentIds.push(chosenSegment.id);
-    numPromptsToFulfill -= 1;
+    remainingSlots -= 1;
   }
 
+  // Add closing segment
   const closingSegments = segments.filter(
     (s) =>
       s.tag === segmentTags.closing &&
@@ -724,6 +831,10 @@ function generateListOfSegmentIds(
   );
   const chosenClosingSegment = getRandomElement(closingSegments);
   out.push(chosenClosingSegment.id);
+
+  console.log('🔍 [generateListOfSegmentIds] Final segment list:', out);
+  console.log('🔍 [generateListOfSegmentIds] Roles covered:', Array.from(rolesCovered));
+
   return out;
 }
 

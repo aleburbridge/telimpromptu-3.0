@@ -22,61 +22,122 @@ export default function PromptAnswering() {
 
   useEffect(() => {
     const initializeRoom = async () => {
+      console.log('🔍 [PromptAnswering] Initializing room for playerId:', playerId);
       const roomId = await getRoomIdFromPlayerId(playerId);
+      console.log('🔍 [PromptAnswering] Got roomId:', roomId);
       setRoomId(roomId);
       const roomData = await getRoomDataFromRoomId(roomId);
+      console.log('🔍 [PromptAnswering] Room data:', roomData);
       setHeadline(roomData.headline);
     };
 
     initializeRoom();
   }, [playerId]);
 
-  useEffect(() => {
-    if (!roomId) return;
+      useEffect(() => {
+    if (!roomId) {
+      console.log('🔍 [PromptAnswering] No roomId yet, waiting...', roomId);
+      return;
+    }
+
+    console.log('🔍 [PromptAnswering] Setting up room listener for roomId:', roomId);
 
     const roomDocRef = doc(db, "rooms", roomId);
     let previousPromptIds = new Set();
 
-    const unsubscribe = onSnapshot(roomDocRef, async (docSnapshot) => {
-      if (docSnapshot.exists()) {
+    // Load initial prompts immediately
+    const loadInitialPrompts = async () => {
+      try {
+        console.log('🔍 [PromptAnswering] Loading initial prompts');
         const fetchedPrompts = await getAvailablePromptsForPlayer(playerId);
-        const prefilledPrompts = await replacePlaceholdersInPrompts(
-          fetchedPrompts,
-          roomId,
-        );
+        console.log('🔍 [PromptAnswering] Initial fetched prompts:', fetchedPrompts);
 
-        const newPrompts = prefilledPrompts.filter(
-          (p) => !previousPromptIds.has(p.id),
-        );
-
-        if (newPrompts.length > 0) {
-          setPrompts((prevPrompts) => [...prevPrompts, ...newPrompts]);
-          previousPromptIds = new Set([
-            ...previousPromptIds,
-            ...newPrompts.map((p) => p.id),
-          ]);
+        if (fetchedPrompts.length > 0) {
+          const prefilledPrompts = await replacePlaceholdersInPrompts(
+            fetchedPrompts,
+            roomId,
+          );
+          console.log('🔍 [PromptAnswering] Initial prefilled prompts:', prefilledPrompts);
+          setPrompts(prefilledPrompts);
+          previousPromptIds = new Set(prefilledPrompts.map((p) => p.id));
         }
+      } catch (error) {
+        console.error('🔍 [PromptAnswering] Error loading initial prompts:', error);
+      }
+    };
 
-        const roomData = await getRoomDataFromRoomId(roomId);
-        const allPlayerDataPromises = roomData.players.map((playerId) =>
-          getPlayerDataFromPlayerId(playerId),
-        );
-        const allPlayerData = await Promise.all(allPlayerDataPromises);
-        const allPrompts = allPlayerData.flatMap((playerData) =>
-          playerData ? playerData.prompts : [],
-        );
-        const allPromptsAnswered = allPrompts.every(
-          (promptId) => roomData.responses && roomData.responses[promptId],
-        );
+    loadInitialPrompts();
 
-        // TODO: this is a shitty cheat. We expect there to be at least 1 prompt, so if there's not, then
-        // do not navigate to the teleprompter just yet.
-        const isPromptsLoaded = allPrompts.length > 0;
-        if (allPromptsAnswered && isPromptsLoaded) {
-          navigate("/teleprompter");
+        const unsubscribe = onSnapshot(
+      roomDocRef,
+      async (docSnapshot) => {
+        try {
+          if (docSnapshot.exists()) {
+            console.log('🔍 [PromptAnswering] Room snapshot updated');
+            const fetchedPrompts = await getAvailablePromptsForPlayer(playerId);
+            console.log('🔍 [PromptAnswering] Fetched prompts for player:', fetchedPrompts);
+            const prefilledPrompts = await replacePlaceholdersInPrompts(
+              fetchedPrompts,
+              roomId,
+            );
+            console.log('🔍 [PromptAnswering] Prefilled prompts:', prefilledPrompts);
+
+            const newPrompts = prefilledPrompts.filter(
+              (p) => !previousPromptIds.has(p.id),
+            );
+            console.log('🔍 [PromptAnswering] New prompts to add:', newPrompts);
+
+            if (newPrompts.length > 0) {
+              setPrompts((prevPrompts) => [...prevPrompts, ...newPrompts]);
+              previousPromptIds = new Set([
+                ...previousPromptIds,
+                ...newPrompts.map((p) => p.id),
+              ]);
+            }
+
+            const roomData = await getRoomDataFromRoomId(roomId);
+            const allPlayerDataPromises = roomData.players.map((playerId) =>
+              getPlayerDataFromPlayerId(playerId),
+            );
+            const allPlayerData = await Promise.all(allPlayerDataPromises);
+            console.log('🔍 [PromptAnswering] All player data:', allPlayerData);
+            const allPrompts = allPlayerData.flatMap((playerData) =>
+              playerData ? playerData.prompts : [],
+            );
+            console.log('🔍 [PromptAnswering] All prompts across players:', allPrompts);
+            const allPromptsAnswered = allPrompts.every(
+              (promptId) => roomData.responses && roomData.responses[promptId],
+            );
+            console.log('🔍 [PromptAnswering] All prompts answered?', allPromptsAnswered);
+
+            // TODO: this is a shitty cheat. We expect there to be at least 1 prompt, so if there's not, then
+            // do not navigate to the teleprompter just yet.
+            const isPromptsLoaded = allPrompts.length > 0;
+            console.log('🔍 [PromptAnswering] Are prompts loaded?', isPromptsLoaded);
+            if (allPromptsAnswered && isPromptsLoaded) {
+              console.log('🔍 [PromptAnswering] Navigating to teleprompter');
+              navigate("/teleprompter");
+            }
+          }
+        } catch (error) {
+          console.error('🔍 [PromptAnswering] Error in snapshot handler:', error);
+        }
+      },
+      (error) => {
+        console.error('🔍 [PromptAnswering] Firestore onSnapshot error:', error);
+
+        // Handle specific Firebase errors
+        if (error.code === 'unavailable') {
+          console.log('🔍 [PromptAnswering] Firestore temporarily unavailable, will retry automatically');
+        } else if (error.code === 'permission-denied') {
+          console.error('🔍 [PromptAnswering] Permission denied - check Firestore rules');
+        } else if (error.code === 'failed-precondition') {
+          console.error('🔍 [PromptAnswering] Firestore connection failed, may need to refresh');
+        } else {
+          console.error('🔍 [PromptAnswering] Unknown Firestore error:', error.code, error.message);
         }
       }
-    });
+    );
 
     return () => unsubscribe();
   }, [roomId, playerId, navigate]);
@@ -85,7 +146,7 @@ export default function PromptAnswering() {
     setResponses((prev) => ({ ...prev, [promptId]: value }));
   }, []);
 
-  const handleSubmit = async (promptId, e) => {
+    const handleSubmit = async (promptId, e) => {
     e.preventDefault();
     const roomId = await getRoomIdFromPlayerId(playerId);
 
@@ -102,6 +163,13 @@ export default function PromptAnswering() {
         );
       } catch (error) {
         console.error("Error submitting response:", error);
+
+        // Handle specific network errors
+        if (error.code === 'unavailable' || error.message.includes('Failed to fetch')) {
+          alert('Network connection issue. Please check your internet connection and try again.');
+        } else {
+          alert('Error submitting response. Please try again.');
+        }
       }
     }
   };

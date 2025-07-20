@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { REGION, PROJECT_ID } from '../config/firebase';
+import { onSnapshot, query, where } from 'firebase/firestore';
+import { db, playerCollectionRef } from '../config/firebase';
 
 function capitalize(s)
 {
@@ -11,28 +11,48 @@ export default function PlayersAndRoles({ roomId }) {
     const [players, setPlayers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        if (roomId === null || roomId === "") {
-            return
+            useEffect(() => {
+        if (!roomId || roomId === null || roomId === "") {
+            console.log('🔍 [PlayersAndRoles] No roomId yet, waiting...', roomId);
+            return;
         }
 
-        const fetchPlayers = async () => {
-            try {
-                const response = await axios.get(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getPlayersInRoom`, {
-                    params: { "roomId": roomId },
-                });
-                if (response.data) {
-                    setPlayers(response.data);
-                }
-                setIsLoading(false);
-            } catch (error) {
-                console.error("Error fetching players: ", error);
-                setIsLoading(false);
-                return
-            }
-        };
+        console.log('🔍 [PlayersAndRoles] Setting up real-time listener for roomId:', roomId);
+        setIsLoading(true); // Reset loading state when roomId changes
 
-        fetchPlayers();
+        const playersQuery = query(playerCollectionRef, where('roomId', '==', roomId));
+
+                const unsubscribe = onSnapshot(
+            playersQuery,
+            (querySnapshot) => {
+                console.log('🔍 [PlayersAndRoles] Players updated, count:', querySnapshot.docs.length);
+                const playersData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log('🔍 [PlayersAndRoles] Players data:', playersData);
+                setPlayers(playersData);
+                setIsLoading(false);
+            },
+            (error) => {
+                console.error("🔍 [PlayersAndRoles] Error listening to players:", error);
+                setIsLoading(false);
+
+                // Handle specific Firebase errors
+                if (error.code === 'unavailable') {
+                    console.log('🔍 [PlayersAndRoles] Firestore temporarily unavailable, will retry automatically');
+                } else if (error.code === 'permission-denied') {
+                    console.error('🔍 [PlayersAndRoles] Permission denied - check Firestore rules');
+                } else {
+                    console.error('🔍 [PlayersAndRoles] Unknown Firestore error:', error.code, error.message);
+                }
+            }
+        );
+
+        return () => {
+            console.log('🔍 [PlayersAndRoles] Cleaning up listener');
+            unsubscribe();
+        };
     }, [roomId]);
 
     return (

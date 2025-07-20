@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../config/axios";
 import { generateSlug } from "random-word-slugs";
 import { REGION, PROJECT_ID } from "../config/firebase.js";
 

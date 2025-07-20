@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getRoomNameById, isRoomJoinable, isRoomPasswordCorrect, getRoomDataFromRoomId } from '../utils/room-utils.js';
 import { getPlayerDataFromPlayerId } from '../utils/player-utils.js';
-import axios from 'axios';
+import axios from '../config/axios';
 import { REGION, PROJECT_ID } from '../config/firebase.js';
 
 export default function JoinRoomPage() {

@@ -6,9 +6,6 @@ export const segmentTags = {
   closing: "closing"
 };
 
-//TODO: remove hyphens on guest expert etc
-
-
 // key:
 // {!prompt} prompts that the players fill out
 // {@name} names of players, pre-filled by the time prompts are displayed
@@ -502,8 +499,8 @@ export const segments: Segment[] = [
       {
         groupId: 'musical-reference',
         subPrompts: [
-          { id: 'musical-artist', description: 'The person who the quote is attributed to.' },
-          { id: 'cohost-lyric', description: 'A quote that {@cohost} will say that somehow relates to tonight\'s story' }
+          { id: 'cohost-lyric', description: 'A quote that {@cohost} will say that somehow relates to tonight\'s story' },
+          { id: 'musical-artist', description: 'The person who the quote is attributed to.' }
         ]
       }
     ]
@@ -524,6 +521,331 @@ export const segments: Segment[] = [
       { id: 'mother-greeting', description: 'Write {#mother-of}\'s mother\'s greeting upon going live on air.' },
       { id: 'mothers-favorite-part', description: 'Write {#mother-of}\'s mother\'s favorite part of the story. Context: \'I especially liked the part when (your text here)\'' },
       { id: 'mother-moral', description: 'Write the moral of the story that {#mother-of}\'s mother will say at the end of the broadcast.'}
+        ]
+  },
+
+  // ----------------- BYSTANDER -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'bystander-1',
+    topic: 'any',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here with {@bystander} {@bystander-lastname}, who happened to be in the area when this all went down. {@bystander}, can you tell us what you saw?' },
+      { speaker: 'bystander', content: 'Well, I was just {!bystander-activity} when suddenly {!bystander-observation}' },
+      { speaker: 'Cohost', content: 'That must have been quite a sight! Did you do anything to help?' },
+      { speaker: 'bystander', content: 'Oh absolutely! I immediately {!bystander-action}' },
+      { speaker: 'Host', content: 'Wow, that\'s... that\'s something alright.' },
+      { speaker: 'bystander', content: 'Yeah, my {!relative-type} always told me "{!family-wisdom}"' },
+      { speaker: 'Cohost', content: 'Words to live by! Thank you {@bystander}.' },
+      { speaker: 'bystander', content: 'No problem! Oh, and tell my {!relative-type} I said hi!' }
+    ],
+    prompts: [
+      { id: 'bystander-activity', description: 'What the bystander ({@bystander}) was doing when the incident occurred' },
+      { id: 'bystander-observation', description: 'What the bystander ({@bystander}) claims to have witnessed' },
+      { id: 'bystander-action', description: 'The bystander ({@bystander})\'s attempt to help during the incident' },
+      { id: 'relative-type', description: 'A family member (e.g. grandmother, uncle, cousin)' },
+      { id: 'family-wisdom', description: 'Advice that the bystander\'s {!relative-type} gave them' }
+    ]
+  },
+
+  // ----------------- EXPERT -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'expert-specialized',
+    topic: 'any',
+    lines: [
+      { speaker: 'Host', content: 'Joining us now is {@expert} {@expert-lastname}, who specializes in {!expert-specialty}. Thank you for being here.' },
+      { speaker: 'expert', content: 'Happy to be here, {@host}. This is exactly the kind of situation I\'ve been studying for {!study-duration}' },
+      { speaker: 'Cohost', content: 'In your expert opinion, what should people know about this situation?' },
+      { speaker: 'expert', content: 'Well, the most important thing is {!expert-advice}. I cannot stress this enough.' },
+      { speaker: 'Host', content: 'That\'s fascinating. Are there any warning signs people should watch for?' },
+      { speaker: 'expert', content: 'Absolutely. If you ever notice {!warning-sign}, you need to immediately {!emergency-action}' },
+      { speaker: 'Cohost', content: 'What about prevention?' },
+      { speaker: 'expert', content: 'Prevention is key. I always recommend {!prevention-method}. It\'s saved countless lives.' },
+      { speaker: 'Host', content: 'Incredible insights. Thank you {@expert}!' }
+    ],
+    prompts: [
+      { id: 'expert-specialty', description: 'What the expert ({@expert}) specializes in' },
+      { id: 'study-duration', description: 'How long the expert has been studying their field' },
+      { id: 'expert-advice', description: 'The most important advice the expert ({@expert}) can give about tonight\'s story' },
+      { id: 'warning-sign', description: 'A warning sign that people should watch for related to tonight\'s story' },
+      { id: 'emergency-action', description: 'What people should do if they notice the warning sign: {!warning-sign}' },
+      { id: 'prevention-method', description: 'The expert\'s recommended prevention method' }
+    ]
+  },
+
+  // ----------------- REFEREE -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'referee-1',
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here with referee {@referee} {@referee-lastname}. {@referee}, there\'s been some controversy about your calls tonight. How do you respond?' },
+      { speaker: 'referee', content: 'Look, {@host}, I\'ve been officiating for {!referee-experience} and I stand by every call I made tonight.' },
+      { speaker: 'Cohost', content: 'Even the one where you called a {!controversial-call}?' },
+      { speaker: 'referee', content: 'Especially that one! The rule clearly states that {!made-up-rule}' },
+      { speaker: 'Host', content: 'But fans are saying {!fan-complaint}' },
+      { speaker: 'referee', content: 'Fans can say whatever they want, but I saw {!referee-justification} clear as day!' },
+      { speaker: 'Cohost', content: 'What about when you {!referee-mistake}?' },
+      { speaker: 'referee', content: 'That wasn\'t a mistake! That was {!referee-explanation}. I had to maintain order!' },
+      { speaker: 'Host', content: 'Well, you certainly kept things interesting tonight, {@referee}.' }
+    ],
+    prompts: [
+      { id: 'referee-experience', description: 'How long the referee ({@referee}) has been officiating' },
+      { id: 'controversial-call', description: 'A controversial call the referee made during the game' },
+      { id: 'made-up-rule', description: 'A ridiculous rule the referee claims justifies their controversial call' },
+      { id: 'fan-complaint', description: 'What the fans are complaining about regarding the referee\'s performance' },
+      { id: 'referee-justification', description: 'What the referee claims they saw to justify their call' },
+      { id: 'referee-mistake', description: 'An obvious mistake the referee made during the game' },
+      { id: 'referee-explanation', description: 'The referee\'s absurd explanation for their obvious mistake' }
+    ]
+  },
+
+  // ----------------- COMMENTATOR -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'commentator-1',
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'We\'re joined by sports commentator {@commentator} {@commentator-lastname}. {@commentator}, you had quite the evening calling tonight\'s game!' },
+      { speaker: 'commentator', content: 'Oh {@host}, what a night! I\'ve never seen anything like {!amazing-play} in my {!commentator-years} years of commentary!' },
+      { speaker: 'Cohost', content: 'Your commentary during that moment was legendary. What exactly did you say?' },
+      { speaker: 'commentator', content: 'I believe my exact words were: "{!memorable-call-out}"' },
+      { speaker: 'Host', content: 'Classic! Do you have a signature catchphrase for moments like that?' },
+      { speaker: 'commentator', content: 'Absolutely! Whenever something incredible happens, I always shout "{!signature-catchphrase}"' },
+      { speaker: 'Cohost', content: 'And what about when things go wrong?' },
+      { speaker: 'commentator', content: 'Well, when things get messy, I like to say "{!disaster-catchphrase}" It keeps the energy up!' },
+      { speaker: 'Host', content: 'You really know how to keep the audience engaged, {@commentator}!' }
+    ],
+    prompts: [
+      { id: 'amazing-play', description: 'An incredible play that happened during tonight\'s game' },
+      { id: 'commentator-years', description: 'How many years the commentator ({@commentator}) has been doing commentary' },
+      { id: 'memorable-call-out', description: 'The commentator\'s exciting call during the amazing play: {!amazing-play}' },
+      { id: 'signature-catchphrase', description: 'The commentator\'s signature catchphrase for incredible moments' },
+      { id: 'disaster-catchphrase', description: 'The commentator\'s catchphrase for when things go wrong during a game' }
+    ]
+  },
+
+  // ----------------- SPORTSCASTER -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'sportscaster-1',
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'Let\'s go to sportscaster {@sportscaster} {@sportscaster-lastname} for the latest updates. {@sportscaster}, what\'s the word from the field?' },
+      { speaker: 'sportscaster', content: 'Thanks {@host}! I\'m here where the energy is absolutely {!energy-description}! The players are {!player-state}' },
+      { speaker: 'Cohost', content: 'Any breaking news from your end?' },
+      { speaker: 'sportscaster', content: 'Actually yes! I\'ve just learned that {!breaking-sports-news}. This could change everything!' },
+      { speaker: 'Host', content: 'Wow! What do the stats tell us about tonight?' },
+      { speaker: 'sportscaster', content: 'The numbers are incredible! We\'re looking at {!fake-statistic-1} and {!fake-statistic-2}' },
+      { speaker: 'Cohost', content: 'Those are some impressive figures!' },
+      { speaker: 'sportscaster', content: 'And get this - the last time we saw numbers like this was {!historical-comparison}!' },
+      { speaker: 'Host', content: 'Keep us posted, {@sportscaster}. Great work out there!' }
+    ],
+    prompts: [
+      { id: 'energy-description', description: 'How to describe the energy at the sporting event' },
+      { id: 'player-state', description: 'What the players are doing or how they\'re feeling right now' },
+      { id: 'breaking-sports-news', description: 'Breaking news from the sporting event' },
+      { id: 'fake-statistic-1', description: 'An impressive but absurd sports statistic' },
+      { id: 'fake-statistic-2', description: 'Another impressive but absurd sports statistic' },
+      { id: 'historical-comparison', description: 'When these kinds of numbers were last seen (make it ridiculous)' }
+    ]
+  },
+
+  // ----------------- ATHLETE -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'athlete-1',
+    topic: 'sports',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here with star athlete {@athlete} {@athlete-lastname}. {@athlete}, how did you prepare for tonight?' },
+      { speaker: 'athlete', content: 'Well {@host}, my training regimen is pretty intense. Every morning I {!morning-routine}' },
+      { speaker: 'Cohost', content: 'That sounds rigorous! What about your diet?' },
+      { speaker: 'athlete', content: 'Nutrition is everything! I only eat {!weird-diet} because it gives me {!diet-benefit}' },
+      { speaker: 'Host', content: 'Interesting approach! What\'s your secret to success?' },
+      { speaker: 'athlete', content: 'The secret is {!success-secret}. My coach always says "{!coach-quote}"' },
+      { speaker: 'Cohost', content: 'Any superstitions or pre-game rituals?' },
+      { speaker: 'athlete', content: 'Oh absolutely! Before every game, I have to {!pre-game-ritual}. It\'s worked for {!ritual-duration}!' },
+      { speaker: 'Host', content: 'Well, whatever you\'re doing, keep it up {@athlete}!' }
+    ],
+    prompts: [
+      { id: 'morning-routine', description: 'The athlete\'s intense morning training routine' },
+      { id: 'weird-diet', description: 'The athlete\'s unusual diet' },
+      { id: 'diet-benefit', description: 'What benefit the athlete claims to get from their weird diet' },
+      { id: 'success-secret', description: 'The athlete\'s secret to success' },
+      { id: 'coach-quote', description: 'Motivational advice the athlete\'s coach always gives' },
+      { id: 'pre-game-ritual', description: 'The athlete\'s pre-game superstition or ritual' },
+      { id: 'ritual-duration', description: 'How long the athlete has been doing their pre-game ritual' }
+    ]
+  },
+
+  // ----------------- VOTER -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'voter-1',
+    topic: 'politics',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here with local voter {@voter} {@voter-lastname}. {@voter}, what are your thoughts on tonight\'s political developments?' },
+      { speaker: 'voter', content: 'Well {@host}, I\'ve been voting for {!voting-duration} and I\'ve never seen anything like this!' },
+      { speaker: 'Cohost', content: 'What issues matter most to you as a voter?' },
+      { speaker: 'voter', content: 'The most important issue is definitely {!top-issue}. Nobody talks about it enough!' },
+      { speaker: 'Host', content: 'How do you stay informed about the candidates?' },
+      { speaker: 'voter', content: 'I get all my news from {!news-source}. They tell it like it is!' },
+      { speaker: 'Cohost', content: 'Any advice for other voters?' },
+      { speaker: 'voter', content: 'My advice is simple: {!voting-advice}. That\'s what democracy is all about!' },
+      { speaker: 'Host', content: 'What would you tell the politicians watching tonight?' },
+      { speaker: 'voter', content: 'I\'d tell them "{!message-to-politicians}"' },
+      { speaker: 'Cohost', content: 'Strong words! Thank you {@voter}!' }
+    ],
+    prompts: [
+      { id: 'voting-duration', description: 'How long the voter ({@voter}) has been voting' },
+      { id: 'top-issue', description: 'The most important political issue according to the voter' },
+      { id: 'news-source', description: 'Where the voter gets their political news (make it unusual)' },
+      { id: 'voting-advice', description: 'The voter\'s advice for other voters' },
+      { id: 'message-to-politicians', description: 'What the voter wants to tell politicians' }
+    ]
+  },
+
+  // ----------------- PUNDIT -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'pundit-1',
+    topic: 'politics',
+    lines: [
+      { speaker: 'Host', content: 'We\'re joined by political pundit {@pundit} {@pundit-lastname}. {@pundit}, what\'s your take on this story?' },
+      { speaker: 'pundit', content: 'This is exactly what I predicted in my book "{!book-title}" which came out {!book-timing}' },
+      { speaker: 'Cohost', content: 'Really? You saw this coming?' },
+      { speaker: 'pundit', content: 'Oh absolutely! The signs were all there: {!political-signs}. Anyone could have seen this!' },
+      { speaker: 'Host', content: 'What do you think happens next?' },
+      { speaker: 'pundit', content: 'Mark my words, within {!prediction-timeframe}, we\'ll see {!bold-prediction}' },
+      { speaker: 'Cohost', content: 'That\'s quite a prediction! What\'s your confidence level?' },
+      { speaker: 'pundit', content: 'I\'d stake my reputation on it! I\'ve been right about {!past-predictions}% of my predictions!' },
+      { speaker: 'Host', content: 'And if you\'re wrong?' },
+      { speaker: 'pundit', content: 'I\'m never wrong! But hypothetically, I\'d {!if-wrong-promise}' }
+    ],
+    prompts: [
+      { id: 'book-title', description: 'The title of the pundit\'s book' },
+      { id: 'book-timing', description: 'When the pundit\'s book came out (relative to current events)' },
+      { id: 'political-signs', description: 'The signs that the pundit claims predicted tonight\'s political story' },
+      { id: 'prediction-timeframe', description: 'How long until the pundit\'s prediction comes true' },
+      { id: 'bold-prediction', description: 'The pundit\'s bold prediction about what will happen in {!prediction-timeframe}' },
+      { id: 'past-predictions', description: 'What percentage of predictions the pundit claims to get right' },
+      { id: 'if-wrong-promise', description: 'What the pundit promises to do if their prediction is wrong' }
+    ]
+  },
+
+  // ----------------- ADVISOR -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'advisor-1',
+    topic: 'politics',
+    lines: [
+      { speaker: 'Host', content: 'We have political advisor {@advisor} {@advisor-lastname} here with us. {@advisor}, you\'ve advised {!advisee-type}. What\'s your take?' },
+      { speaker: 'advisor', content: 'Well {@host}, in my {!advisor-experience} years of experience, the key is always {!political-strategy}' },
+      { speaker: 'Cohost', content: 'What would you advise in this situation?' },
+      { speaker: 'advisor', content: 'The smart move here is to {!strategic-advice}. It\'s Political Strategy 101!' },
+      { speaker: 'Host', content: 'Have you ever dealt with a situation like this before?' },
+      { speaker: 'advisor', content: 'Oh yes! Back in {!past-year}, I helped {!past-client} when they faced {!past-crisis}' },
+      { speaker: 'Cohost', content: 'How did that turn out?' },
+      { speaker: 'advisor', content: 'Complete success! We {!past-solution} and their approval rating went up {!approval-increase}%!' },
+      { speaker: 'Host', content: 'Any final thoughts for our viewers?' },
+      { speaker: 'advisor', content: 'Remember folks, in politics {!political-wisdom}. That\'s the only way forward!' }
+    ],
+    prompts: [
+      { id: 'advisee-type', description: 'What type of politicians the advisor has worked with (mayors, senators, etc.)' },
+      { id: 'advisor-experience', description: 'How many years of political advising experience they have' },
+      { id: 'political-strategy', description: 'The advisor\'s key to political success' },
+      { id: 'strategic-advice', description: 'What the advisor recommends for the current situation' },
+      { id: 'past-year', description: 'A year when the advisor handled a similar situation' },
+      { id: 'past-client', description: 'A politician the advisor previously helped' },
+      { id: 'past-crisis', description: 'The crisis the advisor helped their past client with' },
+      { id: 'past-solution', description: 'How the advisor solved the past crisis' },
+      { id: 'approval-increase', description: 'How much the approval rating increased (make it absurd)' },
+      { id: 'political-wisdom', description: 'The advisor\'s political wisdom for viewers' }
+    ]
+  },
+
+  // ----------------- LOBBYIST -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'lobbyist-1',
+    topic: 'politics',
+    lines: [
+      { speaker: 'Host', content: 'Joining us now is lobbyist {@lobbyist} {@lobbyist-lastname}, representing the {!organization-name}. {@lobbyist}, how does tonight\'s story affect your interests?' },
+      { speaker: 'lobbyist', content: 'Thanks for having me, {@host}. This story directly impacts our mission to {!organization-mission}' },
+      { speaker: 'Cohost', content: 'What changes would you like to see?' },
+      { speaker: 'lobbyist', content: 'We\'re pushing for legislation that would {!proposed-law}. It\'s common sense!' },
+      { speaker: 'Host', content: 'Some people say lobbyists have too much influence. How do you respond?' },
+      { speaker: 'lobbyist', content: 'That\'s ridiculous! We\'re just concerned citizens who happen to {!lobbyist-activity}. There\'s nothing wrong with that!' },
+      { speaker: 'Cohost', content: 'What\'s next for your organization?' },
+      { speaker: 'lobbyist', content: 'Next week we\'re meeting with {!politician-target} to discuss {!meeting-topic}' },
+      { speaker: 'Host', content: 'Any message for lawmakers watching tonight?' },
+      { speaker: 'lobbyist', content: 'Remember, {!lobbyist-message}. The people are counting on you!' }
+    ],
+    prompts: [
+      { id: 'organization-name', description: 'The name of the organization the lobbyist represents' },
+      { id: 'organization-mission', description: 'The mission of the lobbyist\'s organization' },
+      { id: 'proposed-law', description: 'What legislation the lobbyist wants to see passed' },
+      { id: 'lobbyist-activity', description: 'What the lobbyist claims they do (instead of admitting to lobbying)' },
+      { id: 'politician-target', description: 'A politician the lobbyist is meeting with next week' },
+      { id: 'meeting-topic', description: 'What the lobbyist will discuss in their upcoming meeting' },
+      { id: 'lobbyist-message', description: 'The lobbyist\'s message to lawmakers' }
+    ]
+  },
+
+  // ----------------- PROSECUTOR -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'prosecutor-1',
+    topic: 'crime',
+    lines: [
+      { speaker: 'Host', content: 'We\'re here with prosecutor {@prosecutor} {@prosecutor-lastname}. {@prosecutor}, what charges are you considering?' },
+      { speaker: 'prosecutor', content: 'We\'re looking at {!charge-list}. This is a serious matter, {@host}' },
+      { speaker: 'Cohost', content: 'How strong is your case?' },
+      { speaker: 'prosecutor', content: 'We have {!evidence-type} that clearly shows {!evidence-claim}. It\'s an open and shut case!' },
+      { speaker: 'Host', content: 'What\'s the most damning piece of evidence?' },
+      { speaker: 'prosecutor', content: 'I can\'t reveal everything, but let\'s just say we found {!key-evidence} at the scene' },
+      { speaker: 'Cohost', content: 'When will this go to trial?' },
+      { speaker: 'prosecutor', content: 'We expect to be in court within {!trial-timeline}. Justice will be served!' },
+      { speaker: 'Host', content: 'Any message for the community?' },
+      { speaker: 'prosecutor', content: 'This sends a clear message: {!prosecutor-message}. We will not tolerate this behavior!' }
+    ],
+    prompts: [
+      { id: 'charge-list', description: 'The charges the prosecutor is considering' },
+      { id: 'evidence-type', description: 'What type of evidence the prosecutor has' },
+      { id: 'evidence-claim', description: 'What the prosecutor claims the evidence proves' },
+      { id: 'key-evidence', description: 'The most important piece of evidence found at the scene' },
+      { id: 'trial-timeline', description: 'When the case will go to trial' },
+      { id: 'prosecutor-message', description: 'The prosecutor\'s message to the community' }
+    ]
+  },
+
+  // ----------------- DEFENSE -------------------------
+  {
+    tag: segmentTags.segment,
+    id: 'defense-1',
+    topic: 'crime',
+    lines: [
+      { speaker: 'Host', content: 'Now we hear from defense attorney {@defense} {@defense-lastname}. {@defense}, how do you plan to defend your client?' },
+      { speaker: 'defense', content: 'My client is {!innocence-claim}, {@host}. The real story here is {!alternative-theory}' },
+      { speaker: 'Cohost', content: 'But what about the evidence the prosecution has?' },
+      { speaker: 'defense', content: 'That so-called evidence is {!evidence-dismissal}. Any competent investigation would show {!counter-evidence}' },
+      { speaker: 'Host', content: 'Do you have an alibi for your client?' },
+      { speaker: 'defense', content: 'Absolutely! At the time of the incident, my client was {!alibi-claim} with {!alibi-witness}' },
+      { speaker: 'Cohost', content: 'What\'s your strategy going into trial?' },
+      { speaker: 'defense', content: 'We\'re going to prove that {!defense-strategy}. The jury will see the truth!' },
+      { speaker: 'Host', content: 'Confident words! Any final thoughts?' },
+      { speaker: 'defense', content: 'In America, {!legal-principle}. My client deserves justice, not a witch hunt!' }
+    ],
+    prompts: [
+      { id: 'innocence-claim', description: 'How the defense attorney claims their client is innocent' },
+      { id: 'alternative-theory', description: 'The defense attorney\'s alternative explanation for what really happened' },
+      { id: 'evidence-dismissal', description: 'How the defense attorney dismisses the prosecution\'s evidence' },
+      { id: 'counter-evidence', description: 'Evidence the defense claims supports their client\'s innocence' },
+      { id: 'alibi-claim', description: 'What the client was allegedly doing during the crime' },
+      { id: 'alibi-witness', description: 'Who can allegedly verify the client\'s alibi' },
+      { id: 'defense-strategy', description: 'The defense attorney\'s strategy for proving innocence' },
+      { id: 'legal-principle', description: 'A legal principle the defense attorney invokes' }
     ]
   },
 ]

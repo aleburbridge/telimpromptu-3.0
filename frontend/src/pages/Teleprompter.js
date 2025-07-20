@@ -7,7 +7,7 @@ import { getSegmentData } from '../utils/scripts-utils';
 import { replacePlaceholdersInPrompts, replaceSpeakerInPrompts } from '../utils/scripts-utils';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../config/axios';
 import { PROJECT_ID, REGION } from '../config/firebase';
 
 export default function Teleprompter() {
@@ -116,12 +116,15 @@ export default function Teleprompter() {
                         <br />
                     </div>
                 ))}
+                {/*
                 <p className='text-accent text-3xl'>
                     Thanks for playing! You can access this teleprompter again by going to this link: {link}
                     <br/>
                     <br/>
-                <Link to='/' className='text-primary'>← Return to home page</Link>
-            </p>
+                    <Link to='/' className='text-primary'>← Return to home page</Link>
+                </p>
+                */}
+            
             </div>
             <div className="controls mt-4 flex gap-4">
                 <button className="hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={() => handleSpeedChange(speed - 1)}>«</button>

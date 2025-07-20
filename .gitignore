@@ -3,3 +3,5 @@ firebase.json
 main.f8dec86f.js
 main.f8dec86f.js.map
 .env
+
+.config/

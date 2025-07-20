@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../config/axios';
 import { query, where, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { roomsCollectionRef, playerCollectionRef } from '../config/firebase';
 

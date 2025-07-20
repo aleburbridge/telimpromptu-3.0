@@ -1,7 +1,7 @@
 import { query, where, doc, getDocs, getDocFromServer, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { playerCollectionRef } from '../config/firebase';
 import { getRoomDataFromRoomId } from './room-utils';
-import axios from 'axios';
+import axios from '../config/axios';
 import { PROJECT_ID, REGION } from '../config/firebase';
 
 
@@ -129,20 +129,40 @@ export async function setPlayerPromptAssignments(playerId, promptIds) {
 }
 
 export async function getAvailablePromptsForPlayer(playerId) {
+    console.log('🔍 [getAvailablePromptsForPlayer] Called for playerId:', playerId);
     const response = await axios.get(`https://${REGION}-${PROJECT_ID}.cloudfunctions.net/getSegments`);
     let segments = []
     if (response.data) {
         segments = (response.data);
     }
+    console.log('🔍 [getAvailablePromptsForPlayer] Got segments:', segments.length);
     try {
         const playerData = await getPlayerDataFromPlayerId(playerId);
+        console.log('🔍 [getAvailablePromptsForPlayer] Player data:', playerData);
         const roomId = await getRoomIdFromPlayerId(playerId);
         const roomData = await getRoomDataFromRoomId(roomId);
+        console.log('🔍 [getAvailablePromptsForPlayer] Room data:', roomData);
         
-        const promptIds = playerData.prompts;
+        // Return empty array if script building hasn't completed yet
+        if (!roomData.segmentIds) {
+            console.log('🔍 [getAvailablePromptsForPlayer] No segmentIds in room data');
+            return [];
+        }
+        
+        const promptIds = playerData.prompts || [];
+        console.log('🔍 [getAvailablePromptsForPlayer] Player prompt IDs:', promptIds);
+        
+        // Return empty array if no prompts assigned to player yet
+        if (promptIds.length === 0) {
+            console.log('🔍 [getAvailablePromptsForPlayer] Player has no prompt assignments');
+            return [];
+        }
+        
         const allPrompts = segments.filter(s => roomData.segmentIds.includes(s.id)).reduce((acc, segment) => [...acc, ...segment.prompts.map(p => getAllPrompts(p)).flat()], []);
+        console.log('🔍 [getAvailablePromptsForPlayer] All prompts from segments:', allPrompts);
         // Filter out prompts that have already been responded to
         const answeredPrompts = roomData.responses || {};
+        console.log('🔍 [getAvailablePromptsForPlayer] Answered prompts:', answeredPrompts);
 
         const availablePrompts = allPrompts.filter(prompt => {
             if (!promptIds.includes(prompt.id)) return false;
@@ -159,6 +179,7 @@ export async function getAvailablePromptsForPlayer(playerId) {
                 return answeredPrompts[dependentPromptId];
             });
         });
+        console.log('🔍 [getAvailablePromptsForPlayer] Available prompts:', availablePrompts);
         return availablePrompts;
     } catch (error) {
         console.error('Error fetching available prompts for player:', error);

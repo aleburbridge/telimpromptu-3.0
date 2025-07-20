@@ -1,5 +1,5 @@
 import { getPlayersInRoom, getRoomDataFromRoomId } from "./room-utils";
-import axios from "axios";
+import axios from "../config/axios";
 import { REGION, PROJECT_ID } from "../config/firebase";
 
 // call this every time someone answers a prompt
