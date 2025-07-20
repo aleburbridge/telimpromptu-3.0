@@ -5,3 +5,12 @@ main.f8dec86f.js.map
 .env
 
 .config/
+
+# Build outputs
+build/
+frontend/build/
+dist/
+
+# Firebase
+.firebase/
+firebase-debug.log
