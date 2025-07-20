@@ -13,7 +13,7 @@ this will show a special testing button on the homepage
 ## How to Play
 
 
-Go to https://telimpromptu.net to play 
+Go to https://telimpromptu.web.app/ to play 
 
 
 ## Contributing
