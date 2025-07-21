@@ -268,7 +268,6 @@ const topicToRolesMap = new Map<string, string[]>([
       "guestexpert",
       "mother",
       "witness",
-      "viewer",
       "bystander",
       "expert",
     ],

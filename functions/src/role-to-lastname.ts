@@ -16,7 +16,6 @@ export const roleToLastNameList = [
   { role: 'criminal', lastNames: ['McGuilty'] },
   { role: 'guestexpert', lastNames: ['Expertson'] },
   { role: 'fieldreporter', lastNames: ['Fieldsly', 'Fielderson'] },
-  { role: 'viewer', lastNames: ['Watcherly', 'Observer'] },
   { role: 'bystander', lastNames: ['Looker', 'Passerby'] },
   { role: 'expert', lastNames: ['Knowsalot', 'Smartington'] },
   { role: 'voter', lastNames: ['Voterson', 'Balloter'] },

@@ -34,6 +34,7 @@ TODO:
 
 🪲 BUGS 🪲
 • leaving room should delete you from database
+- I get multiple prompts 
 
 Versioning
 MAJOR.MINOR.PATCH
