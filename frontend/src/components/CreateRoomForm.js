@@ -13,10 +13,10 @@ export default function CreateRoomForm() {
   const generateWordSlug = () => {
     let wordSlug = generateSlug(2, { format: "title" });
 
-    if (wordSlug.toLowerCase().endsWith("boy")) {
-      wordSlug = wordSlug + "s";
-    } else if (wordSlug.endsWith("y")) {
+    if (wordSlug.endsWith("y")) {
       wordSlug = wordSlug.slice(0, -1) + "ies";
+    } else if (wordSlug.endsWith("oo")) {
+      wordSlug = wordSlug + "s";
     } else if (wordSlug.endsWith("ch") || wordSlug.endsWith("o")) {
       wordSlug = wordSlug + "es";
     } else if (wordSlug.endsWith("s")) {

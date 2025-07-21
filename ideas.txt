@@ -34,7 +34,9 @@ TODO:
 
 🪲 BUGS 🪲
 • leaving room should delete you from database
-- I get multiple prompts 
+- I get multiple of the same prompt
+- The same user may get the same prompt because the same role was given two segments
+- One role may never get segments
 
 Versioning
 MAJOR.MINOR.PATCH
