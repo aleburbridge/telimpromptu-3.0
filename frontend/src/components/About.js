@@ -8,7 +8,7 @@ export default function About() {
         <h3 className="text-xl font-bold mb-2">💡 About</h3>
         <p>
           Telimpromptu is a free multiplayer game where players create and
-          present whacky mad-libs style news broadcasts
+          present mad-libs style news broadcasts
         </p>
         <Link
           to="/script-writing"
