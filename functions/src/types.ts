@@ -1,8 +1,24 @@
+export type GameType = "broadcast" | "funnies";
+
+export interface FunniesPlayerResponses {
+    [imageId: string]: string;
+}
+
+export interface FunniesState {
+    images: string[];
+    orders?: { [playerId: string]: string[] };
+    responses?: { [playerId: string]: FunniesPlayerResponses };
+    completedPlayers?: string[];
+    updatedAt?: FirebaseFirestore.Timestamp | Date;
+}
+
 export interface RoomData {
     id: string;
     roomName: string;
     roomNameLower: string;
     password: string;
+    gameType: GameType;
+    funnies?: FunniesState | null;
     segmentIds: string[] | null;
     responses: any[];
     headlineWriterId: string | null;
@@ -15,7 +31,7 @@ export interface RoomData {
     createdAt: FirebaseFirestore.Timestamp | Date;
     [key: string]: any;
   }
-  
+
   export interface Segment {
     id: string;
     tag: string;

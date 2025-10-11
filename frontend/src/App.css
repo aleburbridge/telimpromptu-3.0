@@ -205,6 +205,154 @@
   }
 }
 
+.funnies-paper {
+  background: #f6f1e4;
+  color: #111;
+  font-family: 'Libre Baskerville', serif;
+}
+
+.funnies-paper a {
+  color: #c1121f;
+  text-decoration: underline;
+}
+
+.funnies-sheet {
+  background: #fffdf5;
+  border: 2px solid #111;
+  border-radius: 0;
+  box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.12);
+  padding: 2.5rem;
+}
+
+.funnies-headline {
+  font-family: 'Playfair Display', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #111;
+}
+
+.funnies-subhead {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7b000d;
+}
+
+.funnies-image-frame {
+  background: #ffffff;
+  border: 2px solid #111;
+  border-radius: 0;
+  padding: 0.75rem;
+}
+
+.funnies-textarea {
+  width: 100%;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fffaf0;
+  color: #111;
+  padding: 1rem;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.funnies-textarea:focus {
+  outline: 3px solid #c1121f33;
+}
+
+.funnies-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #c1121f;
+  color: #fff;
+  padding: 0.85rem 1.75rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.funnies-button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #111;
+}
+
+.funnies-button:disabled {
+  background: #c7bcbc;
+  color: #666;
+  border-color: #888;
+  box-shadow: 0 0 0 #111;
+  cursor: not-allowed;
+}
+
+.funnies-status {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #f1e7d4;
+  color: #111;
+  padding: 1.25rem;
+  font-family: 'Libre Baskerville', serif;
+}
+
+.funnies-vote-panel {
+  border-top: 2px solid #111;
+  background: #fff7e5;
+  padding: 1.5rem;
+}
+
+.funnies-vote-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #111;
+}
+
+.funnies-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: transparent;
+  color: #111;
+  padding: 0.7rem 1.6rem;
+  font-family: 'Libre Baskerville', serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.funnies-nav-button:hover:not(:disabled) {
+  background: #111;
+  color: #fff;
+}
+
+.funnies-nav-button:disabled {
+  opacity: 0.4;
+  border-color: #999;
+  color: #777;
+}
+
+@media (max-width: 640px) {
+  .funnies-sheet {
+    padding: 1.75rem;
+  }
+
+  .funnies-button,
+  .funnies-nav-button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
 /* Enhanced hover effects for interactive elements */
 .interactive-card {
   @apply transition-all duration-300 hover:scale-105;

@@ -1,6 +1,7 @@
 import axios from '../config/axios';
 import { query, where, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { roomsCollectionRef, playerCollectionRef } from '../config/firebase';
+import { normalizeGameType } from '../constants/gameTypes';
 
 export async function getRoomIdFromRoomName(roomName) {
     const roomQuery = query(roomsCollectionRef, where('roomNameLower', '==', roomName));
@@ -19,9 +20,15 @@ export async function getRoomDataFromRoomId(roomId) {
     try {
         const docRef = doc(roomsCollectionRef, roomId);
         const docSnapshot = await getDoc(docRef);
+        if (!docSnapshot.exists()) {
+            console.error(`Room not found for id ${roomId}`);
+            return null;
+        }
+        const data = docSnapshot.data();
         return {
             id: docSnapshot.id,
-            ...docSnapshot.data()
+            ...data,
+            gameType: normalizeGameType(data?.gameType),
         };
     } catch (error) {
         console.error('Error getting room data from room ID:', error);
@@ -50,6 +57,9 @@ export async function assignHostToRoom(roomId, playerId) {
 export async function isRoomPasswordCorrect(roomId, password) {
     try {
         const data = await getRoomDataFromRoomId(roomId);
+        if (!data) {
+            return false;
+        }
         return data.password === password;
     } catch (error) {
         console.error(`Could not check password for room with id ${roomId}}`, error)
@@ -73,7 +83,7 @@ export async function isRoomNameAvailable(roomName) {
 export async function getRoomNameById(roomId) {
     try {
         const data = await getRoomDataFromRoomId(roomId);
-        return data.roomName;
+        return data ? data.roomName : null;
     } catch (error) {
         console.error(`Could not get room name from room id ${roomId}}`, error)
     }
@@ -83,7 +93,7 @@ export async function getRoomNameById(roomId) {
 export async function isRoomJoinable(roomId) {
     try {
         const data = await getRoomDataFromRoomId(roomId);
-        return data.isJoinable;
+        return data ? data.isJoinable : false;
     } catch (error) {
         console.error(`Could not get room join status from room id ${roomId}}`, error)
     }

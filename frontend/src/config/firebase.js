@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, collection, initializeFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -10,11 +10,43 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+const PROJECT_ID = process.env.REACT_APP_FIREBASE_PROJECT_ID;
 
-export const roomsCollectionRef = collection(db, 'rooms');
-export const playerCollectionRef = collection(db, 'players');
+if (!PROJECT_ID) {
+  console.warn('REACT_APP_FIREBASE_PROJECT_ID is not set. Firestore network calls will fail.');
+}
 
-export const PROJECT_ID = process.env.REACT_APP_FIREBASE_PROJECT_ID;
-export const REGION = "us-central1";
+export const IS_FIREBASE_CONFIGURED = Boolean(PROJECT_ID);
+
+let app = null;
+let dbInstance = null;
+
+if (IS_FIREBASE_CONFIGURED) {
+  try {
+    app = initializeApp(firebaseConfig);
+    // Workaround for environments (proxies/SSE/CORS) where default webchannel/fetch fails.
+    // Initialize Firestore with long polling and disable fetch streams to improve compatibility.
+    dbInstance = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+      useFetchStreams: false,
+    });
+  } catch (initError) {
+    console.error('Failed to initialize Firebase app or Firestore with fallback settings', initError);
+    // Fallback to standard initialization to preserve behavior for normal environments
+    try {
+      app = initializeApp(firebaseConfig);
+      dbInstance = getFirestore(app);
+    } catch (fallbackError) {
+      console.error('Fallback Firestore initialization also failed', fallbackError);
+      dbInstance = null;
+    }
+  }
+}
+
+export const db = dbInstance;
+
+export const roomsCollectionRef = dbInstance ? collection(dbInstance, 'rooms') : null;
+export const playerCollectionRef = dbInstance ? collection(dbInstance, 'players') : null;
+
+export { PROJECT_ID };
+export const REGION = 'us-central1';

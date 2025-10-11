@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../config/axios";
 import { generateSlug } from "random-word-slugs";
-import { REGION, PROJECT_ID } from "../config/firebase.js";
+import { REGION, PROJECT_ID, db } from "../config/firebase.js";
+import { doc, updateDoc } from "firebase/firestore";
+import GameTypeSelector from "./GameTypeSelector";
+import { DEFAULT_GAME_TYPE } from "../constants/gameTypes";
 
-export default function CreateRoomForm() {
+export default function CreateRoomForm({ selectedGameType = DEFAULT_GAME_TYPE, onGameTypeChange }) {
   const navigate = useNavigate();
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [initialRoomName, setInitialRoomName] = useState("");
+  const [gameType, setGameType] = useState(selectedGameType);
 
   const generateWordSlug = () => {
     let wordSlug = generateSlug(2, { format: "title" });
@@ -32,8 +36,19 @@ export default function CreateRoomForm() {
     setInitialRoomName(generateWordSlug());
   }, []);
 
+  useEffect(() => {
+    setGameType(selectedGameType);
+  }, [selectedGameType]);
+
   const handleRegenerate = () => {
     setInitialRoomName(generateWordSlug());
+  };
+
+  const handleGameSelection = (nextGameType) => {
+    setGameType(nextGameType);
+    if (onGameTypeChange) {
+      onGameTypeChange(nextGameType);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -41,6 +56,7 @@ export default function CreateRoomForm() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData);
+    const chosenGameType = payload.gameType || gameType;
 
     try {
       const roomResponse = await axios.post(
@@ -48,6 +64,7 @@ export default function CreateRoomForm() {
         {
           roomName: payload.roomName,
           password: payload.password,
+          gameType: chosenGameType,
         },
       );
 
@@ -64,7 +81,16 @@ export default function CreateRoomForm() {
 
         const playerResult = playerResponse.data;
 
+        try {
+          await updateDoc(doc(db, "rooms", roomResult.roomId), {
+            gameType: chosenGameType,
+          });
+        } catch (updateError) {
+          console.error("Failed to persist game type on room", updateError);
+        }
+
         localStorage.setItem("playerId", playerResult.playerId);
+        localStorage.setItem("gameType", chosenGameType);
         navigate("/waiting-room");
       } else {
         setError(
@@ -82,6 +108,17 @@ export default function CreateRoomForm() {
   return (
     <form className="container-inner mx-auto" onSubmit={handleSubmit}>
       {error && <p className="text-red-500">{error}</p>}
+      <div className="mt-2">
+        <p className="text-left text-xs font-semibold uppercase tracking-wide text-text">
+          Select a game
+        </p>
+        <GameTypeSelector
+          selectedGame={gameType}
+          onSelect={handleGameSelection}
+          className="mt-2"
+        />
+        <input type="hidden" name="gameType" value={gameType} />
+      </div>
       <div>
         <input
           className="input w-full mt-1"

@@ -11,6 +11,8 @@ import {
   Prompt,
   PromptObject,
   RoomData,
+  GameType,
+  FunniesState,
 } from "./types";
 import { roleToLastNameList } from "./role-to-lastname";
 
@@ -23,6 +25,97 @@ const playersCollectionRef = firestore.collection("players");
 const roomsCollectionRef = firestore.collection("rooms");
 
 const corsHandler = cors({ origin: true });
+
+const SUPPORTED_GAME_TYPES: readonly GameType[] = ["broadcast", "funnies"];
+const DEFAULT_GAME_TYPE: GameType = "broadcast";
+
+function normalizeGameType(value: unknown): GameType {
+  if (typeof value === "string") {
+    const lowered = value.toLowerCase();
+    if ((SUPPORTED_GAME_TYPES as readonly string[]).includes(lowered)) {
+      return lowered as GameType;
+    }
+  }
+  return DEFAULT_GAME_TYPE;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function normalizeStringRecordArray(
+  value: unknown,
+): Record<string, string[]> | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const result: Record<string, string[]> = {};
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    const normalized = normalizeStringArray(entry);
+    if (normalized.length > 0) {
+      result[key] = normalized;
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function normalizeFunniesResponses(
+  value: unknown,
+): Record<string, Record<string, string>> | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const responses: Record<string, Record<string, string>> = {};
+  for (const [playerId, playerResponses] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
+    if (typeof playerResponses !== "object" || playerResponses === null) {
+      continue;
+    }
+    const normalizedPlayerResponses: Record<string, string> = {};
+    for (const [imageId, caption] of Object.entries(
+      playerResponses as Record<string, unknown>,
+    )) {
+      if (typeof caption === "string") {
+        normalizedPlayerResponses[imageId] = caption;
+      }
+    }
+    if (Object.keys(normalizedPlayerResponses).length > 0) {
+      responses[playerId] = normalizedPlayerResponses;
+    }
+  }
+  return Object.keys(responses).length > 0 ? responses : undefined;
+}
+
+function normalizeFunniesState(value: unknown): FunniesState | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const raw = value as Record<string, unknown>;
+  const images = normalizeStringArray(raw.images);
+  const orders = normalizeStringRecordArray(raw.orders);
+  const responses = normalizeFunniesResponses(raw.responses);
+  const completedPlayers = normalizeStringArray(raw.completedPlayers);
+  const hasOrders = orders && Object.keys(orders).length > 0;
+  const hasResponses = responses && Object.keys(responses).length > 0;
+  const hasCompleted = completedPlayers.length > 0;
+  const hasImages = images.length > 0;
+
+  if (!hasImages && !hasOrders && !hasResponses && !hasCompleted) {
+    return null;
+  }
+
+  return {
+    images,
+    orders,
+    responses,
+    completedPlayers: hasCompleted ? completedPlayers : undefined,
+    updatedAt: raw.updatedAt as admin.firestore.Timestamp | undefined,
+  };
+}
 
 function containsAny(set: Set<string>, array: string[]): boolean {
   for (const item of array) {
@@ -123,7 +216,15 @@ export const getRoomDataFromRoomId = async (roomId: string) => {
     const docRef = roomsCollectionRef.doc(roomId);
     const docSnapshot = await docRef.get();
     if (docSnapshot.exists) {
-      return { id: docSnapshot.id, ...docSnapshot.data() } as RoomData;
+      const rawData = docSnapshot.data() ?? {};
+      const recordData = rawData as Record<string, unknown>;
+      const roomData: RoomData = {
+        ...(rawData as RoomData),
+        id: docSnapshot.id,
+        gameType: normalizeGameType(recordData.gameType),
+        funnies: normalizeFunniesState(recordData.funnies),
+      };
+      return roomData;
     } else {
       console.error("Room not found:", roomId);
       return null;
@@ -138,7 +239,7 @@ export const getRoomDataFromRoomId = async (roomId: string) => {
 export const saveRoomToDb = functions.https.onRequest((req, res) => {
   corsHandler(req, res, async () => {
     try {
-      const { roomName, password } = req.body;
+      const { roomName, password, gameType } = req.body;
 
       if (!roomName || !password) {
         return res
@@ -156,10 +257,14 @@ export const saveRoomToDb = functions.https.onRequest((req, res) => {
           .send({ success: false, message: "Room name taken" });
       }
 
+      const resolvedGameType = normalizeGameType(gameType);
+
       const docRef = await roomsCollectionRef.add({
         roomName: roomName,
         roomNameLower: roomName.toLowerCase(),
         password: password,
+        gameType: resolvedGameType,
+        funnies: null,
         players: [],
         rolesAssigned: false,
         segmentIds: null,
@@ -174,7 +279,9 @@ export const saveRoomToDb = functions.https.onRequest((req, res) => {
         createdAt: new Date(),
       });
 
-      return res.status(200).send({ success: true, roomId: docRef.id });
+      return res
+        .status(200)
+        .send({ success: true, roomId: docRef.id, gameType: resolvedGameType });
     } catch (error) {
       console.error("Could not save room", error);
       return res
@@ -213,6 +320,28 @@ export const getPlayersInRoom = functions.https.onRequest((req, res) => {
       return res
         .status(500)
         .send({ success: false, message: "Error getting players from room" });
+    }
+  });
+});
+
+export const getRoomData = functions.https.onRequest((req, res) => {
+  corsHandler(req, res, async () => {
+    try {
+      const { roomId } = req.query;
+
+      if (!roomId) {
+        return res
+          .status(400)
+          .send({ success: false, message: "roomId is required" });
+      }
+
+      const roomData = await getRoomDataFromRoomId(roomId as string);
+      return res.status(200).send(roomData);
+    } catch (error) {
+      console.error(`Error getting room data`, error);
+      return res
+        .status(500)
+        .send({ success: false, message: "Error getting room data" });
     }
   });
 });

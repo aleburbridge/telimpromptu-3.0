@@ -12,23 +12,33 @@ import Footer from "./components/Footer";
 import PromptAnswering from "./pages/PromptAnswering";
 import Teleprompter from "./pages/Teleprompter";
 import { UnderDevelopment } from "./pages/UnderDevelopment";
+import FunniesCaptionPage from "./pages/FunniesCaptionPage";
+import FunniesShowcasePage from "./pages/FunniesShowcasePage";
 
 function App() {
   const location = useLocation();
   const isTeleprompterPage = location.pathname.startsWith("/teleprompter");
+  const isFunniesPage = location.pathname.startsWith("/funnies");
+
+  const headerClassName = isFunniesPage
+    ? "w-full bg-[#c1121f] py-3 flex flex-col border-b-4 border-black"
+    : "w-full bg-primary py-2 mb-4 flex flex-col";
+
+  const titleClassName = isFunniesPage ? "text-2xl font-bold text-[#f6f1e4]" : "text-2xl font-bold text-text";
 
   return (
     <div className="App flex flex-col min-h-screen">
       {!isTeleprompterPage && (
-        <header className="w-full bg-primary py-2 mb-4 flex flex-col">
-          <h1 className="text-2xl font-bold flex items-center justify-center">
-            <Link to="/" className="no-underline flex items-center text-text">
+        <header className={headerClassName}>
+          <h1 className="flex items-center justify-center">
+            <Link
+              to="/"
+              className={`no-underline flex items-center ${isFunniesPage ? "text-[#f6f1e4]" : "text-text"}`}
+            >
               <span className="my-auto">
-                <p>
-                  <p>
-                    <em>Telimpromptu</em>
-                  </p>
-                </p>
+                <em className={titleClassName}>
+                  {isFunniesPage ? "Telimpromptu Funnies" : "Telimpromptu"}
+                </em>
               </span>
             </Link>
           </h1>
@@ -46,9 +56,11 @@ function App() {
           <Route path="/prompt-answering" element={<PromptAnswering />} />
           <Route path="/teleprompter" element={<Teleprompter />} />
           <Route path="/teleprompter/:roomName" element={<Teleprompter />} />
+          <Route path="/funnies-caption" element={<FunniesCaptionPage />} />
+          <Route path="/funnies-showcase" element={<FunniesShowcasePage />} />
         </Routes>
       </main>
-      {!isTeleprompterPage && <Footer />}
+      {!isTeleprompterPage && <Footer isFunniesMode={isFunniesPage} />}
     </div>
   );
 }
