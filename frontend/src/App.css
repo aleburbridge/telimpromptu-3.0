@@ -340,6 +340,196 @@
   color: #777;
 }
 
+.funnies-button--selected {
+  background: #7b000d;
+  border-color: #7b000d;
+}
+
+.funnies-button.funnies-button--vote {
+  box-shadow: none;
+  transform: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.funnies-button.funnies-button--vote:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.funnies-button.funnies-button--victory {
+  background: #0b7285;
+  border-color: #111;
+}
+
+.funnies-button.funnies-button--victory:hover:not(:disabled) {
+  background: #095d6a;
+  box-shadow: 6px 6px 0 #111;
+}
+
+.funnies-victory-cta {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid #111;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.funnies-victory-meta {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: #444;
+}
+
+.funnies-victory-error {
+  color: #b00020;
+  font-size: 0.9rem;
+}
+
+.funnies-dek {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #3b2f2f;
+}
+
+.funnies-winners-grid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.funnies-winners-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #fffdf5;
+  border: 2px solid #111;
+  box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.12);
+}
+
+.funnies-image-frame--winners {
+  max-height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.funnies-winner-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.funnies-winner-name {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  color: #444;
+}
+
+.funnies-winner-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #111;
+}
+
+.funnies-winner-votes {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7b000d;
+}
+
+.funnies-winner-empty {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.funnies-winner-empty--full {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.funnies-caption-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.funnies-caption-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.funnies-caption-card + .funnies-caption-card {
+  border-top: 1px solid #d8c9b0;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.funnies-caption-author {
+  flex: 0 0 auto;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #444;
+}
+
+.funnies-caption-text {
+  flex: 1 1 200px;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #111;
+}
+
+.funnies-caption-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.funnies-vote-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.funnies-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #111;
+  background: #f6f1e4;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 640px) {
   .funnies-sheet {
     padding: 1.75rem;
@@ -350,6 +540,44 @@
     width: 100%;
     text-align: center;
     justify-content: center;
+  }
+
+  .funnies-caption-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .funnies-caption-text {
+    width: 100%;
+    text-align: left;
+  }
+
+  .funnies-caption-card + .funnies-caption-card {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .funnies-caption-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .funnies-victory-cta {
+    align-items: flex-start;
+    margin-top: 1.5rem;
+  }
+
+  .funnies-winners-grid {
+    gap: 1.75rem;
+    grid-template-columns: 1fr;
+  }
+
+  .funnies-winners-card {
+    padding: 1.25rem;
   }
 }
 

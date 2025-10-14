@@ -35,11 +35,18 @@ TODO:
 🪲 BUGS 🪲
 • leaving room should delete you from database
 - I get multiple of the same prompt
-- The same user may get the same prompt because the same role was given two segments
-- One role may never get segments
 
 Versioning
 MAJOR.MINOR.PATCH
 MAJOR version when you make incompatible API changes,
 MINOR version when you add functionality in a backwards-compatible manner, and
 PATCH version when you make backwards-compatible bug fixes.ßß
+
+FUNNIES
+Sticky fingers display 
+Vote count always is the global count
+Fix voting 
+Universal comic display
+Arrow for next previews the name
+Bring name back 
+Victory screen of comics and winning captions

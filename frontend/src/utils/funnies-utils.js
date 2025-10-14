@@ -225,3 +225,25 @@ export function tallyVotesPerImage(votesMap) {
   });
   return results;
 }
+
+export function tallyVotesByCaption(votesMap) {
+  if (!votesMap || typeof votesMap !== "object") {
+    return {};
+  }
+  const tallies = {};
+  Object.values(votesMap).forEach((vote) => {
+    if (!vote || typeof vote !== "object") {
+      return;
+    }
+    const { imageId, captionOwnerId } = vote;
+    if (typeof imageId !== "string" || typeof captionOwnerId !== "string") {
+      return;
+    }
+    if (!tallies[imageId]) {
+      tallies[imageId] = {};
+    }
+    const imageTallies = tallies[imageId];
+    imageTallies[captionOwnerId] = (imageTallies[captionOwnerId] || 0) + 1;
+  });
+  return tallies;
+}

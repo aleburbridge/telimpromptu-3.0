@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db, IS_FIREBASE_CONFIGURED } from "../config/firebase";
 import {
   getListOfPlayersFromRoomId,
@@ -12,7 +12,7 @@ import {
   encodeImageKey,
   filterCaptionsByImages,
   sanitizeImageSet,
-  tallyVotesPerImage,
+  tallyVotesByCaption,
 } from "../utils/funnies-utils";
 
 function groupResponsesByImage({ images, responses, playersMap }) {
@@ -49,17 +49,22 @@ function groupResponsesByImage({ images, responses, playersMap }) {
 export default function FunniesShowcasePage() {
   const navigate = useNavigate();
   const playerIdRef = useRef(null);
+  const hasNavigatedToWinnersRef = useRef(false);
 
   const [roomId, setRoomId] = useState("");
   const [playersMap, setPlayersMap] = useState({});
   const [images, setImages] = useState([]);
   const [responses, setResponses] = useState({});
   const [votes, setVotes] = useState({});
+  const [roomPlayerIds, setRoomPlayerIds] = useState([]);
+  const [winnersReadyPlayers, setWinnersReadyPlayers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentResponseIndex, setCurrentResponseIndex] = useState(0);
+  const [visibleResponseCount, setVisibleResponseCount] = useState(1);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingVote, setIsSubmittingVote] = useState(false);
+  const [isAcknowledgingWinners, setIsAcknowledgingWinners] = useState(false);
+  const [winnersError, setWinnersError] = useState("");
 
   const showcaseGroups = useMemo(
     () => groupResponsesByImage({ images, responses, playersMap }),
@@ -68,28 +73,60 @@ export default function FunniesShowcasePage() {
 
   const currentGroup = showcaseGroups[currentIndex];
   const currentResponses = currentGroup?.responses || [];
-  const currentResponse = currentResponses[currentResponseIndex];
-  const voteTallies = useMemo(() => tallyVotesPerImage(votes), [votes]);
-  const currentImageVoteCount = currentGroup
-    ? voteTallies[currentGroup.imageId] || 0
-    : 0;
+  const voteTalliesByCaption = useMemo(
+    () => tallyVotesByCaption(votes),
+    [votes],
+  );
+  const currentImageTallies = currentGroup
+    ? voteTalliesByCaption[currentGroup.imageId] || {}
+    : {};
+
+  const currentUserVote = useMemo(() => {
+    if (!playerIdRef.current || !currentGroup) {
+      return null;
+    }
+    const encodedKey = encodeImageKey(currentGroup.imageId);
+    return votes?.[`${encodedKey}_${playerIdRef.current}`] || null;
+  }, [currentGroup, votes]);
+
+  const revealedResponses = useMemo(
+    () => currentResponses.slice(0, visibleResponseCount),
+    [currentResponses, visibleResponseCount],
+  );
+
+  const canRevealMore = visibleResponseCount < currentResponses.length;
+  const nextResponseToReveal = canRevealMore
+    ? currentResponses[visibleResponseCount]
+    : null;
+  const isFinalImage =
+    showcaseGroups.length > 0 && currentIndex === showcaseGroups.length - 1;
+  const areResponsesFullyRevealed =
+    currentResponses.length === 0 || !canRevealMore;
+  const shouldShowWinnersButton = isFinalImage && areResponsesFullyRevealed;
+  const totalPlayers =
+    roomPlayerIds.length > 0
+      ? roomPlayerIds.length
+      : Object.keys(playersMap).length;
+  const acknowledgedCount = winnersReadyPlayers.length;
+  const hasPlayerAcknowledged = playerIdRef.current
+    ? winnersReadyPlayers.includes(playerIdRef.current)
+    : false;
+  const remainingAcknowledgements = Math.max(
+    totalPlayers - acknowledgedCount,
+    0,
+  );
+  const isWaitingForOthers = hasPlayerAcknowledged && remainingAcknowledgements > 0;
+  const winnersButtonDisabled = isAcknowledgingWinners || hasPlayerAcknowledged;
 
   const handleNavigateHome = useCallback(() => {
     navigate("/");
   }, [navigate]);
 
-  const handleNextResponse = useCallback(() => {
-    setCurrentResponseIndex((index) =>
-      Math.min(index + 1, Math.max(currentResponses.length - 1, 0)),
+  const handleRevealNext = useCallback(() => {
+    setVisibleResponseCount((count) =>
+      Math.min(count + 1, currentResponses.length),
     );
   }, [currentResponses.length]);
-
-  const handlePreviousResponse = useCallback(() => {
-    setCurrentResponseIndex((index) => Math.max(index - 1, 0));
-  }, []);
-
-  const hasNextResponse = currentResponseIndex + 1 < currentResponses.length;
-  const hasPreviousResponse = currentResponseIndex > 0;
 
   useEffect(() => {
     const initialize = async () => {
@@ -146,6 +183,11 @@ export default function FunniesShowcasePage() {
       }
 
       const data = snapshot.data() || {};
+      const roomPlayers = Array.isArray(data.players)
+        ? data.players.filter((value) => typeof value === "string")
+        : [];
+      setRoomPlayerIds(roomPlayers);
+
       const gameType = normalizeGameType(data.gameType);
       if (gameType !== "funnies") {
         handleNavigateHome();
@@ -153,6 +195,16 @@ export default function FunniesShowcasePage() {
       }
 
       const funniesData = data.funnies || {};
+      const winnersReadyList = Array.isArray(funniesData.winnersReadyPlayers)
+        ? Array.from(
+            new Set(
+              funniesData.winnersReadyPlayers.filter(
+                (value) => typeof value === "string" && value.length > 0,
+              ),
+            ),
+          )
+        : [];
+      setWinnersReadyPlayers(winnersReadyList);
       const imageListRaw = Array.isArray(funniesData.images)
         ? funniesData.images
         : [];
@@ -197,8 +249,24 @@ export default function FunniesShowcasePage() {
   }, [handleNavigateHome, roomId]);
 
   useEffect(() => {
-    setCurrentResponseIndex(0);
-  }, [currentIndex]);
+    setVisibleResponseCount(1);
+  }, [currentIndex, currentResponses.length]);
+
+  useEffect(() => {
+    const totalPlayersCount =
+      roomPlayerIds.length > 0
+        ? roomPlayerIds.length
+        : Object.keys(playersMap).length;
+
+    if (
+      totalPlayersCount > 0 &&
+      winnersReadyPlayers.length >= totalPlayersCount &&
+      !hasNavigatedToWinnersRef.current
+    ) {
+      hasNavigatedToWinnersRef.current = true;
+      navigate("/funnies-winners");
+    }
+  }, [navigate, playersMap, roomPlayerIds, winnersReadyPlayers]);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((index) => Math.max(index - 1, 0));
@@ -210,6 +278,50 @@ export default function FunniesShowcasePage() {
     );
   }, [showcaseGroups.length]);
 
+  const handleAcknowledgeWinners = useCallback(async () => {
+    const playerId = playerIdRef.current;
+    if (
+      !shouldShowWinnersButton ||
+      !roomId ||
+      !playerId ||
+      isAcknowledgingWinners ||
+      winnersReadyPlayers.includes(playerId)
+    ) {
+      return;
+    }
+
+    if (!IS_FIREBASE_CONFIGURED) {
+      setWinnersError(
+        "This environment isn't connected to the backend, so we can't show winners.",
+      );
+      return;
+    }
+
+    setIsAcknowledgingWinners(true);
+    setWinnersError("");
+    try {
+      const roomRef = doc(db, "rooms", roomId);
+      await updateDoc(roomRef, {
+        "funnies.winnersReadyPlayers": arrayUnion(playerId),
+        "funnies.updatedAt": Date.now(),
+      });
+      setWinnersReadyPlayers((previous) =>
+        previous.includes(playerId) ? previous : [...previous, playerId],
+      );
+    } catch (ackError) {
+      console.error("Failed to record winners acknowledgement", ackError);
+      setWinnersError("We couldn't register your click. Please try again.");
+    } finally {
+      setIsAcknowledgingWinners(false);
+    }
+  }, [
+    IS_FIREBASE_CONFIGURED,
+    isAcknowledgingWinners,
+    roomId,
+    shouldShowWinnersButton,
+    winnersReadyPlayers,
+  ]);
+
   const resetIndexOnDataChange = useRef(showcaseGroups.length);
   useEffect(() => {
     if (resetIndexOnDataChange.current !== showcaseGroups.length) {
@@ -218,42 +330,52 @@ export default function FunniesShowcasePage() {
     }
   }, [showcaseGroups.length]);
 
-  const handleVote = useCallback(async () => {
-    if (!roomId || !playerIdRef.current || !currentGroup || !currentResponse) {
-      return;
-    }
+  const handleVote = useCallback(
+    async (selectedResponse) => {
+      if (
+        !roomId ||
+        !playerIdRef.current ||
+        !currentGroup ||
+        !selectedResponse ||
+        isSubmittingVote
+      ) {
+        return;
+      }
 
-    if (!IS_FIREBASE_CONFIGURED) {
-      console.error('Cannot submit vote: Firebase not configured');
-      setError('Cannot submit vote: backend not configured.');
-      return;
-    }
+      if (!IS_FIREBASE_CONFIGURED) {
+        console.error('Cannot submit vote: Firebase not configured');
+        setError('Cannot submit vote: backend not configured.');
+        return;
+      }
 
-    const imageId = currentGroup.imageId;
-    const encodedImageKey = encodeImageKey(imageId);
-    const voteKey = `${encodedImageKey}_${playerIdRef.current}`;
+      const imageId = currentGroup.imageId;
+      const encodedImageKey = encodeImageKey(imageId);
+      const voteKey = `${encodedImageKey}_${playerIdRef.current}`;
+      const captionOwnerId = selectedResponse.playerId;
 
-    setIsSubmittingVote(true);
-    try {
-      const roomRef = doc(db, "rooms", roomId);
-      await updateDoc(roomRef, {
-        [`funnies.votes.${voteKey}`]: {
-          imageId,
-          playerId: currentResponse.playerId,
-          voterId: playerIdRef.current,
-          captionOwnerId: currentResponse.playerId,
-          captionText: currentResponse.caption,
-          votedAt: Date.now(),
-        },
-        "funnies.updatedAt": Date.now(),
-      });
-    } catch (voteError) {
-      console.error("Failed to record vote", voteError);
-      setError("We could not save your vote. Please try again.");
-    } finally {
-      setIsSubmittingVote(false);
-    }
-  }, [currentGroup, currentResponse, roomId]);
+      setIsSubmittingVote(true);
+      try {
+        const roomRef = doc(db, "rooms", roomId);
+        await updateDoc(roomRef, {
+          [`funnies.votes.${voteKey}`]: {
+            imageId,
+            playerId: captionOwnerId,
+            voterId: playerIdRef.current,
+            captionOwnerId,
+            captionText: selectedResponse.caption,
+            votedAt: Date.now(),
+          },
+          "funnies.updatedAt": Date.now(),
+        });
+      } catch (voteError) {
+        console.error("Failed to record vote", voteError);
+        setError("We could not save your vote. Please try again.");
+      } finally {
+        setIsSubmittingVote(false);
+      }
+    },
+    [currentGroup, isSubmittingVote, roomId],
+  );
 
   if (error) {
     return (
@@ -289,40 +411,87 @@ export default function FunniesShowcasePage() {
             <p className="funnies-subhead">
               Image {currentIndex + 1} of {showcaseGroups.length}
             </p>
-            <h1 className="funnies-headline text-4xl">Evening Edition Showcase</h1>
           </header>
 
           <div className="funnies-image-frame">
             <img
               src={currentGroup.imageId}
               alt="Comic strip panel"
-              className="w-full max-h-[480px] object-contain"
+              className="w-full max-h-[50vh] object-contain"
             />
           </div>
 
-          {currentResponse ? (
-            <div className="funnies-vote-panel space-y-6">
-              <p className="text-lg leading-7">
-                {currentResponse.caption}
-              </p>
-              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+          {revealedResponses.length ? (
+            <div className="funnies-caption-list">
+              {revealedResponses.map((response, index) => {
+                const voteCount = currentImageTallies[response.playerId] || 0;
+                const isUserVote =
+                  currentUserVote?.captionOwnerId === response.playerId;
+                return (
+                  <article key={response.playerId} className="funnies-caption-card">
+                    <p className="funnies-caption-author italic">
+                      {response.playerName}
+                    </p>
+                    <p className="funnies-caption-text">&ldquo;{response.caption}&rdquo;</p>
+                    <div className="funnies-caption-actions">
+                      <button
+                        type="button"
+                        className={`funnies-button funnies-button--vote ${
+                          isUserVote ? "funnies-button--selected" : ""
+                        }`}
+                        onClick={() => handleVote(response)}
+                      >
+                        Vote
+                      </button>
+                      <div className="funnies-vote-counter">
+                        <span className="funnies-vote-count">{voteCount}</span>
+                        <span className="funnies-subhead">Votes</span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+              {canRevealMore && (
                 <button
                   type="button"
-                  className="funnies-button"
-                  onClick={handleVote}
-                  disabled={isSubmittingVote}
+                  className="funnies-nav-button"
+                  onClick={handleRevealNext}
                 >
-                  {isSubmittingVote ? "Submitting…" : "Vote for this Caption"}
+                  Reveal Next Caption
+                  {nextResponseToReveal?.playerName ? (
+                    <>
+                      {' '}
+                      (<span className="italic">{nextResponseToReveal.playerName}</span>)
+                    </>
+                  ) : null}
                 </button>
-                <div className="flex items-center gap-3">
-                  <p className="funnies-subhead">Votes for this caption</p>
-                  <span className="funnies-vote-count">{currentImageVoteCount}</span>
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="funnies-vote-panel">
               <p>No captions were submitted for this image.</p>
+            </div>
+          )}
+
+          {shouldShowWinnersButton && (
+            <div className="funnies-victory-cta">
+              <button
+                type="button"
+                className="funnies-button funnies-button--victory"
+                onClick={handleAcknowledgeWinners}
+                disabled={winnersButtonDisabled}
+              >
+                {isWaitingForOthers ? "Waiting for other players…" : "See Winners"}
+              </button>
+              <p className="funnies-victory-meta">
+                {acknowledgedCount}/{totalPlayers || "?"} players ready
+                {isWaitingForOthers && remainingAcknowledgements > 0
+                  ? ` — waiting for ${remainingAcknowledgements} more`
+                  : ""}
+              </p>
+              {winnersError ? (
+                <p className="funnies-victory-error">{winnersError}</p>
+              ) : null}
             </div>
           )}
         </section>
@@ -344,24 +513,6 @@ export default function FunniesShowcasePage() {
           >
             Next Image
           </button>
-          <div className="ml-auto flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="funnies-nav-button"
-              onClick={handlePreviousResponse}
-              disabled={!hasPreviousResponse}
-            >
-              Previous Caption
-            </button>
-            <button
-              type="button"
-              className="funnies-nav-button"
-              onClick={handleNextResponse}
-              disabled={!hasNextResponse}
-            >
-              Next Caption
-            </button>
-          </div>
         </nav>
       </div>
     </div>

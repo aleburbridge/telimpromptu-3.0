@@ -185,6 +185,7 @@ export default function FunniesCaptionPage() {
           orders: normalizedOrders,
           responses: encodeResponsesMap(sanitizedResponses),
           completedPlayers: sanitizedCompletedPlayers,
+          winnersReadyPlayers: [],
         };
 
         transaction.set(roomRef, { funnies: updatedFunniesData }, { merge: true });

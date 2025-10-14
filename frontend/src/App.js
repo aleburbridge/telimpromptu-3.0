@@ -14,6 +14,7 @@ import Teleprompter from "./pages/Teleprompter";
 import { UnderDevelopment } from "./pages/UnderDevelopment";
 import FunniesCaptionPage from "./pages/FunniesCaptionPage";
 import FunniesShowcasePage from "./pages/FunniesShowcasePage";
+import FunniesWinnersPage from "./pages/FunniesWinnersPage";
 
 function App() {
   const location = useLocation();
@@ -58,6 +59,7 @@ function App() {
           <Route path="/teleprompter/:roomName" element={<Teleprompter />} />
           <Route path="/funnies-caption" element={<FunniesCaptionPage />} />
           <Route path="/funnies-showcase" element={<FunniesShowcasePage />} />
+          <Route path="/funnies-winners" element={<FunniesWinnersPage />} />
         </Routes>
       </main>
       {!isTeleprompterPage && <Footer isFunniesMode={isFunniesPage} />}
